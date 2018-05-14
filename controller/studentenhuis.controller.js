@@ -45,8 +45,17 @@ module.exports = {
 
   krijgStudentenhuis(req, res, next) {
     
-    //Verkrijg ID
+    //Verkrijg ID en controleer of het een nummer is
     const id = req.params.huisId;
+    try {
+        assert(typeof (id) === 'number', 'huisId must be a number.')
+    }
+    catch (ex) {
+        const error = new ApiError(ex.toString(), 412)
+        next(error)
+        return
+    }
+
 
     //Voer query uit die alle items uit studentenhuis
     db.query({

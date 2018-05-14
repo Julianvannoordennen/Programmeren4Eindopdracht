@@ -28,10 +28,9 @@ app.use('/api', routes/authentication.routes.js)
 app.all('*', AuthController.validateToken);
 */
 //Standaard endpoints
-
-app.use("/api/studentenhuis", personRoutes);
 app.use("/api/studentenhuis", maaltijdRoutes);
-app.use("/api/studentenhuis", studentenhuisRoutes);
+//app.use("/api/studentenhuis", maaltijdRoutes);
+//app.use("/api/studentenhuis", studentenhuisRoutes);
 
 //Niet bestaande endpoint getriggerd
 app.use("*", function(req, res, next) {

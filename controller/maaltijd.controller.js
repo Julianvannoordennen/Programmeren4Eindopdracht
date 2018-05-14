@@ -7,11 +7,13 @@ const db = require('../config/db');
 const Maaltijd = require('../Model/Maaltijd')
 
 module.exports = {
+
   maakNieuweMaaltijd(req, res, next) {
 
     console.log(1)
 
     try {
+
       assert(typeof(req.body) === 'object', 'request body must have an object.')
       assert(typeof(req.body.naam) === 'string', 'naam moet text zijn.')
       assert(typeof(req.body.beschrijving) === 'string', 'naam moet text zijn.')
@@ -19,11 +21,12 @@ module.exports = {
       assert(typeof(req.body.allergie) === 'string', 'allergie moet text zijn.')
       assert(typeof(req.body.prijs) === 'number', 'prijs moet een getal zijn.')
 
-    } catch (error) {
-      const error = new ApiError(error.toString(), 422)
+    } catch (ex) {
+      const error = new ApiError(ex.toString(), 422)
       next(error)
       return
     }
+    
     console.log(2)
     let maaltijd = new Maaltijd(
       req.body.naam,
@@ -41,8 +44,7 @@ module.exports = {
 
     db.query('query', (error, rows, fields) => {
       if (error) {
-        let error = new ApiError(error.toString(), 422)
-        next(error);
+        next(new ApiError(error.toString(), 422));
       } else {
         res.status(200).json({
           status: {
@@ -67,5 +69,5 @@ module.exports = {
 
   verwijderMaaltijd(req, res, next) {
 
-  },
+  }
 }

@@ -2,7 +2,7 @@
 // Authentication routes
 //
 const routes = require('express').Router();
-const maaltijdController = require('../controller/maaltijd.controller.js')
+const maaltijdController = require('../controller/maaltijd.controller')
 
 //const AuthController = require('../controllers/authentication.controller')
 

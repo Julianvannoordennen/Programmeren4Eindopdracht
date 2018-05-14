@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const personRoutes = require('./routes/deelnemer.routes.js')
 const maaltijdRoutes = require('./routes/maaltijd.routes.js')
 const studentenhuisRoutes = require('./routes/studentenhuis.routes.js')
+const apiTest = require('./routes/test.js')
 
 //Project bestanden
 const ApiError = require("./model/ApiError");
@@ -32,6 +33,7 @@ app.all('*', AuthController.validateToken);
 app.use("/api/studentenhuis", personRoutes);
 app.use("/api/studentenhuis", maaltijdRoutes);
 app.use("/api/studentenhuis", studentenhuisRoutes);
+app.use("/test", apiTest)
 
 //Niet bestaande endpoint getriggerd
 app.use("*", function(req, res, next) {

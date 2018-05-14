@@ -8,8 +8,11 @@ const studentenhuisRoutes = require('./routes/studentenhuis.routes')
 const apiTest = require('./routes/test')
 
 //Project bestanden
-const ApiError = require("./model/ApiError");
-const settings = require("./config/config");
+
+const ApiError = require('./model/ApiError')
+const settings = require('./config/config')
+const AuthController = require('./controllers/authentication.controller')
+const authentication_routes = require('./routes/authentication.routes')
 
 //Express laden
 let app = express();
@@ -21,9 +24,8 @@ app.use(bodyParser.json());
 app.use(morgan("dev"));
 
 //Deze routes mogen worden bereikt zonder Authenticatie
-/*
 app.use('/api', routes/authentication.routes.js)
-*/
+
 //Authenticatie voor alle standaard endpoints
 /*
 app.all('*', AuthController.validateToken);

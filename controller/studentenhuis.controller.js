@@ -3,6 +3,7 @@
 //
 const ApiError = require('../model/ApiError')
 const assert = require('assert')
+const db = require('../config/db')
 
 module.exports = {
 
@@ -10,16 +11,21 @@ module.exports = {
   },
 
   krijgStudentenHuizen(req, res, next) {
-    let query = {
+
+    //Voer query uit die alle items uit studentenhuis
+    db.query({
       sql: 'SELECT * FROM studentenhuis',
       timeout: 2000
-    }
+    }, (ex, rows, fields) => {
 
-    db.query('query', (error, rows, fields) => {
+      //Error
       if (ex) {
         let error = new ApiError(ex.toString(), 422)
         next(error);
+
       } else {
+
+        //Correct, stuur studentenhuizen terug
         res.status(200).json({
           status: {
             query: 'OK'
@@ -28,7 +34,6 @@ module.exports = {
         }).end()
       }
     })
-    console.log(4)
   },
 
   krijgStudentenhuis(req, res, next) {

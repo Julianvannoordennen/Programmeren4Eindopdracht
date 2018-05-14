@@ -120,7 +120,6 @@ module.exports = {
   krijgStudentenhuis(req, res, next) {
     
     //Verkrijg ID en controleer of het een nummer is
-    const id = req.params.huisId;
     const id = parseInt(req.params.huisId);
     try {
         assert(typeof (id) === 'number', 'huisId must be a number.')

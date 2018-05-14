@@ -3,7 +3,7 @@
 //
 
 const routes = require('express').Router();
-const AuthController = require('../controllers/authentication.controller')
+//const AuthController = require('../controllers/authentication.controller')
 
 // The router endpoints that we provide
 routes.post('/login', AuthController.login)

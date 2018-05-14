@@ -2,13 +2,15 @@
 // Authentication routes
 //
 const routes = require('express').Router();
-const AuthController = require('../controllers/authentication.controller')
+const studentenhuisController = require('../controller/studentenhuis.controller.js')
+
+//const AuthController = require('../controllers/authentication.controller')
 
 // The router endpoints that we provide
-routes.post('/', controller/deelnemer.routes.js.maakNieuwStudentenhuis)
-routes.get('/', controller/deelnemer.routes.js.krijgStudentenHuizen)
-routes.get('/:huisId', controller/deelnemer.routes.js.krijgStudentenhuis)
-routes.put('/:huisId', controller/deelnemer.routes.js.vervangStudentenhuis)
-routes.delete('/:huisId', controller/deelnemer.routes.js.verwijderStudentenhuis)
+routes.post('/', studentenhuisController.maakNieuwStudentenhuis)
+routes.get('/', studentenhuisController.krijgStudentenHuizen)
+//routes.get('/:huisId', studentenhuisController.krijgStudentenhuis)
+//routes.put('/:huisId', studentenhuisController.vervangStudentenhuis)
+//routes.delete('/:huisId', studentenhuisController.verwijderStudentenhuis)
 
 module.exports = routes

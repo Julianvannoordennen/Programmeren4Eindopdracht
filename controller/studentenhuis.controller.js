@@ -89,9 +89,9 @@ module.exports = {
       timeout: 2000
     }, (ex, rows, fields) => {
 
-      //Error bij verbinden met database
+      //Error
       if (ex) {
-        let error = new ApiError(ex.toString(), 404)
+        let error = new ApiError(ex.toString(), 422)
         next(error);
 
       } else {
@@ -118,6 +118,7 @@ module.exports = {
 
   /***** Zoek een specifiek studentenhuis op bij ID *****/
   krijgStudentenhuis(req, res, next) {
+<<<<<<< HEAD
     
     //Verkrijg ID en controleer of het een nummer is
     const id = parseInt(req.params.huisId);
@@ -165,6 +166,8 @@ module.exports = {
         res.status(200).json(response).end()
       }
     })
+=======
+>>>>>>> 857446e2715bc20d018a234a855f55ae13ac0ac6
   },
 
   vervangStudentenhuis(req, res, next) {

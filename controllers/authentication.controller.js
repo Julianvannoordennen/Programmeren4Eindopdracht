@@ -130,12 +130,14 @@ module.exports = {
             req.body.password
         )
         
+        console.log(person.password);
         //Persoon toevoegen
-        connection.query({
+        let query = {
             sql: "INSERT INTO user VALUES(null,?,?,?,?)",
             values: [person.firstname, person.lastname, person.email, person.password],
             timeout: 2000
-        }, (err, rows, fields) => {
+        }
+        connection.query(query, (err, rows, fields) => {
             if(err) {
                 
                 //Email bestaat al

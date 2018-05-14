@@ -21,24 +21,6 @@ app.use(morgan('dev'))
     app.use('/api', auth_routes)
 */
 
-const connection = require('./config/db')
-//Persoon verkrijgen
-let query = {
-    sql: "INSERT INTO user VALUES(null,?,?,?,?)",
-    values: ['test', 'test2', 'test3', 'test4'],
-    timeout: 2000
-}
-connection.query(query, (err, rows, fields) => {
-    
-    if(err) {
-        console.log('Error: ' + err)
-    }
-    if(rows) {
-        console.log('We got rows!')
-        console.dir(rows)
-    }
-})
-
 //Authenticatie voor alle standaard endpoints
 /*
     app.all('*', AuthController.validateToken);

@@ -10,7 +10,8 @@ class UserRegisterJSON {
         this.email = email;
         
         //Password encrypten
-        bcrypt.hash(password.trim(), 8, (err, hash) => {
+        this.password = bcrypt.hashSync(password.trim(), 8);
+        /*bcrypt.hash(password.trim(), 8, (err, hash) => {
 
             //Fout
             if(err) 
@@ -19,7 +20,7 @@ class UserRegisterJSON {
             //Correct, geencrypt wachtwoord opslaan
             if(hash) 
                 this.password = hash
-        })
+        })*/
     }
 }
 

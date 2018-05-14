@@ -9,14 +9,14 @@ const settings = require('../../config/config')
 function encodeToken(data) {
 
     //Payload voor token maken
-    const playload = {
+    const payload = {
         exp: moment().add(10, 'days').unix(),
         iat: moment().unix(),
         sub: data
     }
-
+console.log(settings.secretkey);
     //Encoding terugsturen
-    return jwt.encode(playload, settings.secretkey)
+    return jwt.encode(payload, settings.secretkey)
 }
 
 //Decoderen van data

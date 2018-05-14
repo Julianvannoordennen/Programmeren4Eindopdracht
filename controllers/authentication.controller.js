@@ -130,14 +130,12 @@ module.exports = {
             req.body.password
         )
         
-        console.log(person.password);
         //Persoon toevoegen
-        let query = {
+        connection.query({
             sql: "INSERT INTO user VALUES(null,?,?,?,?)",
             values: [person.firstname, person.lastname, person.email, person.password],
             timeout: 2000
-        }
-        connection.query(query, (err, rows, fields) => {
+        }, (err, rows, fields) => {
             if(err) {
                 
                 //Email bestaat al
@@ -151,12 +149,13 @@ module.exports = {
                     user: person.email,
                     role: 'admin, user'
                 }
-               
+
                 //Token terugsturen
                 const userinfo = {
                     token: authentication.encodeToken(payload),
                     email: person.email
                 }
+               console.log(userinfo);
                 res.status(200).json(userinfo).end()
             }
         })

@@ -7,6 +7,7 @@ class ApiError {
         this.code = code;
         this.datetime = new Date().toISOString()
     }
+
 }
 
 //Exporteren voor gebruik bij andere files

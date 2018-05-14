@@ -6,6 +6,7 @@ class UserLoginJSON {
         this.email = email;
         this.password = password;
     }
+
 }
 
 //Exporteren voor gebruik bij andere files

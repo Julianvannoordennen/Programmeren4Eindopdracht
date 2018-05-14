@@ -5,12 +5,10 @@ const ApiError = require('../model/ApiError')
 const assert = require('assert')
 const db = require('../config/db');
 const Maaltijd = require('../Model/Maaltijd')
-
+const MaaltijdResponse =  require('../Model/MaaltijdResponse')
 module.exports = {
 
   maakNieuweMaaltijd(req, res, next) {
-
-    console.log(1)
 
     try {
 
@@ -26,8 +24,7 @@ module.exports = {
       next(error)
       return
     }
-    
-    console.log(2)
+
     let maaltijd = new Maaltijd(
       req.body.naam,
       req.body.beschrijving,
@@ -35,31 +32,40 @@ module.exports = {
       req.body.allergie,
       req.body.prijs
     )
-    console.log(3)
     let query = {
-      sql: 'INSERT INTO maaltijd VALUES (?, ?, ?, ?, ?)',
-      values: [maaltijd.naam, maaltijd.beschrijving, maaltijd.ingredienten, maaltijd.allergie, maaltijd.prijs],
+      sql: 'INSERT INTO maaltijd VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      values: [null, maaltijd.naam, maaltijd.beschrijving, maaltijd.ingredienten, maaltijd.allergie, maaltijd.prijs, 1, 1],
       timeout: 2000
     }
 
-    db.query('query', (error, rows, fields) => {
+    db.query(query, (error, rows, fields) => {
       if (error) {
         next(new ApiError(error.toString(), 422));
       } else {
-        res.status(200).json({
-          status: {
-            query: 'OK'
-          },
-          result: rows,
-          result: fields
-        }).end()
+        res.status(200).json(new MaaltijdResponse(null, maaltijd.naam, maaltijd.beschrijving, maaltijd.ingredienten, maaltijd.allergie, maaltijd.prijs)).end()
       }
     })
-    console.log(4)
   },
 
 
-  krijgMaaltijdPerStudentenhuis(req, res, next) {},
+  krijgMaaltijdPerStudentenhuis(req, res, next) {
+    // const URL = window.location.href
+    //
+    // let studentenHuisId = URL.search
+    // console.log(studentenHuisId)
+    console.log('hoi')
+
+    let maaltijd = new Maaltijd(
+      "a",
+      "b",
+      "c",
+      "d",
+      "e",
+    )
+
+    res.status(200).json(new MaaltijdResponse(null, maaltijd.naam, maaltijd.beschrijving, maaltijd.ingredienten, maaltijd.allergie, maaltijd.prijs)).end()
+
+  },
 
 
   krijgMaaltijdPerStudentenhuis(req, res, next) {},

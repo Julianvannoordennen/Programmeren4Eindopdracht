@@ -8,7 +8,7 @@ const maaltijdController = require('../controller/maaltijd.controller')
 
 // The router endpoints that we provide
 routes.post('/:huisId/maaltijd', maaltijdController.maakNieuweMaaltijd)
-//routes.get('/:huisId/maaltijd', maaltijdController.krijgMaaltijdenPerStudentenhuis)
+routes.get('/:huisId/maaltijd', maaltijdController.krijgMaaltijdPerStudentenhuis)
 //routes.get('/:huisId/maaltijd/:maaltijdId', maaltijdController.routes.js.krijgMaaltijdPerStudentenhuis)
 //routes.put('/:huisId/maaltijd/:maaltijdId', maaltijdController.routes.js.vervangMaaltijd)
 //routes.delete('/:huisId/maaltijd/:maaltijdId', maaltijdController.routes.js.verwijderMaaltijd)

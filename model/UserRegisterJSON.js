@@ -1,3 +1,5 @@
+const bcrypt = require('bcryptjs');
+
 //User register class
 class UserRegisterJSON {
 
@@ -6,7 +8,18 @@ class UserRegisterJSON {
         this.firstname = firstname;
         this.lastname = lastname;
         this.email = email;
-        this.password = password;
+        
+        //Password encrypten
+        bcrypt.hash(password.trim(), 8, (err, hash) => {
+
+            //Fout
+            if(err) 
+                throw(new ApiError(err.toString(), 500))
+
+            //Correct, geencrypt wachtwoord opslaan
+            if(hash) 
+                this.password = hash
+        })
     }
 }
 

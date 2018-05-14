@@ -1,5 +1,6 @@
 //MYSQL Library inladen
-const mysql = require('mysql');
+const mysql = require('mysql')
+const config = require('./config')
 
 //Verbindingsarray maken
 var connectionData = {

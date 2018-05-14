@@ -22,13 +22,13 @@ module.exports = {
       next(error)
       return
     }
-    
+
     //Studentenhuis maken
     const studentenhuis = new Studentenhuis(
-      req.body.naam, 
+      req.body.naam,
       req.body.adres
     )
-    
+
     //Studentenhuis toevoegen
     db.query({
       sql: "INSERT INTO studentenhuis VALUES(null,?,?," + 1 + ")",
@@ -53,13 +53,13 @@ module.exports = {
           timeout: 2000
         }, (ex, rows, fields) => {
           if(ex) {
-              
+
               //Error
               const error = new ApiError(ex, 412)
               next(error)
 
           } else {
-          
+
             //Array maken en alles omzetten
             const row = rows[0]
             const response = new StudentenhuisResponse(
@@ -118,8 +118,7 @@ module.exports = {
 
   /***** Zoek een specifiek studentenhuis op bij ID *****/
   krijgStudentenhuis(req, res, next) {
-<<<<<<< HEAD
-    
+
     //Verkrijg ID en controleer of het een nummer is
     const id = parseInt(req.params.huisId);
     try {
@@ -144,7 +143,7 @@ module.exports = {
         next(error);
 
       } else if (rows.length == 0) {
-         
+
         let error = new ApiError("ID " + id + " not found", 404)
         next(error);
 
@@ -166,8 +165,6 @@ module.exports = {
         res.status(200).json(response).end()
       }
     })
-=======
->>>>>>> 857446e2715bc20d018a234a855f55ae13ac0ac6
   },
 
   vervangStudentenhuis(req, res, next) {

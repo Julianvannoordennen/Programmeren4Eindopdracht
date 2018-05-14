@@ -17,19 +17,18 @@ app.use(bodyParser.json())
 app.use(morgan('dev'))
 
 //Deze routes mogen worden bereikt zonder Authenticatie
-/*
-    app.use('/api', auth_routes)
-*/
+
+	app.use('/api', routes/authentication.routes.js)
 
 //Authenticatie voor alle standaard endpoints
-/*
+
     app.all('*', AuthController.validateToken);
-*/
 
 //Standaard endpoints
-/*
-    app.use('/api', person_routes)
-*/
+
+		app.use('/api/studentenhuis', routes/studentenhuis.routes.js)
+		app.use('/api/maaltijd', routes/maaltijd.routes.js)
+		app.use('/api/deelnemer', routes/deelnemer.routes.js)
 
 //Niet bestaande endpoint getriggerd
 app.use('*', function (req, res, next) {
@@ -40,7 +39,7 @@ app.use('*', function (req, res, next) {
 //Alle errors komen hier als APIError class
 app.use((err, req, res, next) => {
 	// console.dir(err)
-	res.status((err.code || 404)).json(err).end()	
+	res.status((err.code || 404)).json(err).end()
 })
 
 //Luisteren naar poort

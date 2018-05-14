@@ -1,11 +1,8 @@
 //
 // CRUD operations on person
 //
-const Person = require('../model/Person')
 const ApiError = require('../model/ApiError')
 const assert = require('assert')
-
-let personlist = []
 
 module.exports = {
 

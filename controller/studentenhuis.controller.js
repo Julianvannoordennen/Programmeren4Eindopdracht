@@ -11,21 +11,16 @@ module.exports = {
   },
 
   krijgStudentenHuizen(req, res, next) {
+    // let query = {
+    //   sql: 'SELECT * FROM studentenhuis',
+    //   timeout: 2000
+    // }
 
-    //Voer query uit die alle items uit studentenhuis
-    db.query({
-      sql: 'SELECT * FROM studentenhuis',
-      timeout: 2000
-    }, (ex, rows, fields) => {
-
-      //Error
+    db.query('SELECT * FROM studentenhuis', (ex, rows, fields) => {
       if (ex) {
         let error = new ApiError(ex.toString(), 422)
         next(error);
-
       } else {
-
-        //Correct, stuur studentenhuizen terug
         res.status(200).json({
           status: {
             query: 'OK'

@@ -1,4 +1,8 @@
 // Application configuration
 module.exports = {
-    "webPort": process.env.PORT || "3000"
+    "webPort": "3000",
+    "dbHost": "localhost",
+    "dbUser": "studentenhuis_user",
+    "dbPassword": "secret",
+    "dbDatabase": "studentenhuis"
 }

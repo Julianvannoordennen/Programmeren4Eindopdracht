@@ -6,7 +6,8 @@ const bodyParser = require('body-parser')
 //Project bestanden
 const ApiError = require('./model/ApiError')
 const settings = require('./config/config')
-const authentication_routes = require('./routes/authentication.routes.js')
+const AuthController = require('./controllers/authentication.controller')
+const authentication_routes = require('./routes/authentication.routes')
 
 //Express laden
 let app = express()
@@ -22,9 +23,8 @@ app.use('/api', authentication_routes)
 
 
 //Authenticatie voor alle standaard endpoints
-/*
-    app.all('*', AuthController.validateToken);
-*/
+app.all('*', AuthController.validateToken);
+
 
 //Standaard endpoints
 /*

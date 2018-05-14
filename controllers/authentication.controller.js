@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs')
 const ApiError = require('../model/ApiError')
 const UserLoginJSON = require('../model/UserLoginJSON')
 const UserRegisterJSON = require('../model/UserRegisterJSON')
+const ValidToken = require('../model/ValidToken')
 const authentication = require('../util/auth/authentication')
 const connection = require('../config/db')
 
@@ -49,7 +50,7 @@ module.exports = {
         catch (ex) {
 
             //Foutieve input
-            const error = new ApiError(ex.toString(), 422)
+            const error = new ApiError(ex.toString(), 412)
             next(error)
             return
         }
@@ -88,10 +89,10 @@ module.exports = {
                         }
 
                         //Informatie terugsturen die voor de gebruiker relevant is
-                        const userinfo = { 
-                            token: authentication.encodeToken(payload),
-                            email: rows[0].Email
-                        }
+                        const userinfo = new ValidToken( 
+                            authentication.encodeToken(payload),
+                            rows[0].Email
+                        )
                         res.status(200).json(userinfo).end()
 
                     } else {
@@ -129,36 +130,51 @@ module.exports = {
             req.body.email,
             req.body.password
         )
-        
-        //Persoon toevoegen
+
+        //Dubbele emailadressen tegengaan
         connection.query({
-            sql: "INSERT INTO user VALUES(null,?,?,?,?)",
-            values: [person.firstname, person.lastname, person.email, person.password],
+            sql: "SELECT * FROM user WHERE Email = ? LIMIT 1",
+            values: [person.email],
             timeout: 2000
         }, (err, rows, fields) => {
-            if(err) {
+        
+            //Controleren of de person bestaat
+            if(err || rows.length == 1) {
                 
-                //Email bestaat al
-                const error = new ApiError(err, 412)
-                next(error)
+                //Email niet al
+                next(new ApiError('Invalid credentials, bye.', 401))
 
             } else {
-               
-                //Payload maken
-                const payload = {
-                    user: person.email,
-                    role: 'admin, user'
-                }
 
-                //Token terugsturen
-                const userinfo = {
-                    token: authentication.encodeToken(payload),
-                    email: person.email
-                }
-               console.log(userinfo);
-                res.status(200).json(userinfo).end()
+                //Persoon toevoegen
+                connection.query({
+                    sql: "INSERT INTO user VALUES(null,?,?,?,?)",
+                    values: [person.firstname, person.lastname, person.email, person.password],
+                    timeout: 2000
+                }, (err, rows, fields) => {
+                    if(err) {
+                        
+                        //Email bestaat al
+                        const error = new ApiError(err, 412)
+                        next(error)
+
+                    } else {
+                    
+                        //Payload maken
+                        const payload = {
+                            user: person.email,
+                            role: 'admin, user'
+                        }
+
+                        //Token terugsturen
+                        const userinfo = new ValidToken( 
+                            authentication.encodeToken(payload),
+                            person.email
+                        )
+                        res.status(200).json(userinfo).end()
+                    }
+                })
             }
         })
     }
-
 }

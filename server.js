@@ -2,10 +2,6 @@
 const express = require("express");
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
-const personRoutes = require('./routes/deelnemer.routes.js')
-const maaltijdRoutes = require('./routes/maaltijd.routes.js')
-const studentenhuisRoutes = require('./routes/studentenhuis.routes.js')
-const apiTest = require('./routes/test.js')
 
 //Project bestanden
 const ApiError = require("./model/ApiError");

@@ -6,7 +6,9 @@ const assert = require('assert')
 const db = require('../config/db');
 
 module.exports = {
+  console.log("1")
   maakNieuweMaaltijd(req, res, next) {
+    console.log("2")
 
     try {
       assert(typeof(req.body) === 'object', 'request body must have an object.')
@@ -21,6 +23,7 @@ module.exports = {
       next(error)
       return
     }
+    console.log("3")
 
     let maaltijd = new Maaltijd(
       req.body.naam,
@@ -29,24 +32,29 @@ module.exports = {
       req.body.allergie,
       req.body.prijs
     )
+    console.log("4")
+
     let query = {
       sql: 'INSERT INTO maaltijd VALUES (?, ?, ?, ?, ?)',
       values: [maaltijd.naam, maaltijd.beschrijving, maaltijd.ingredienten, maaltijd.allergie, maaltijd.prijs],
       timeout: 2000
     }
+    console.log("5")
 
-    db.query('query', function(error, rows, fields) {
+    db.query('query', (error, rows, fields) => {
       if (error) {
+        let error = new ApiError(ex.toString(), 422)
         next(error);
       } else {
         res.status(200).json({
           status: {
             query: 'OK'
           },
-          result: rows
-        }).end();
-      };
-    });
+          result: rows,
+          result: fields
+        }).end()
+      }
+    })
   },
 
 
@@ -60,5 +68,12 @@ module.exports = {
 
   verwijderMaaltijd(req, res, next) {
 
-  }
+  },
+
+  catchAll(req, res, next) {
+    res.status(404)
+        .json({
+            message: 'Deze maaltijd endpoint bestaat nog niet!'
+        }).end()
+}
 }

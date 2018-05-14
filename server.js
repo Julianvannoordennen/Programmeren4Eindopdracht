@@ -6,6 +6,8 @@ const bodyParser = require('body-parser')
 //Project bestanden
 const ApiError = require('./model/ApiError')
 const settings = require('./config/config')
+const AuthController = require('./controllers/authentication.controller')
+const authentication_routes = require('./routes/authentication.routes')
 
 //Express laden
 let app = express()
@@ -17,6 +19,7 @@ app.use(bodyParser.json())
 app.use(morgan('dev'))
 
 //Deze routes mogen worden bereikt zonder Authenticatie
+
 
 	app.use('/api', routes/authentication.routes.js)
 
@@ -38,8 +41,7 @@ app.use('*', function (req, res, next) {
 
 //Alle errors komen hier als APIError class
 app.use((err, req, res, next) => {
-	// console.dir(err)
-	res.status((err.code || 404)).json(err).end()
+	res.status((err.code || 404)).json(err).end()	
 })
 
 //Luisteren naar poort

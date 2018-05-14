@@ -1,6 +1,7 @@
 // Application configuration
 module.exports = {
-    "webPort": "3000",
+    "secretkey": process.env.SECRETKEY,
+    "webPort": process.env.PORT || "3000"
     "dbHost": "localhost",
     "dbUser": "studentenhuis_user",
     "dbPassword": "secret",

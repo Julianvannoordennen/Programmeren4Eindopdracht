@@ -1,8 +1,39 @@
+//MYSQL Library inladen
+const mysql = require('mysql');
+
+//Verbindingsarray maken
+var connectionData = {
+    host: process.env.DB_HOST || config.dbHost,
+    user: process.env.DB_USER || config.dbUser,
+    password: process.env.DB_PASSWORD || config.dbPassword,
+    database: process.env.DB_DATABASE || config.dbDatabase
+};
+
+//Verbinding opzetten d.m.v. omgevingsvariabelen
+const connection = mysql.createConnection(connectionData);
+
+//Verbinden
+connection.connect((error) => {
+
+    //Controleren op fouten
+    if (error) {
+        console.log(error);
+        return;
+    } else {
+        console.log("Connected to " + connectionData.host + ":" + connectionData.database);
+    }
+});
+
+//Connectie beschikbaar maken
+module.exports = connection;
+/*
 //
 // ./config/connection.js
 //
 // Configuratiebestand voor MySql database.
 //
+//MYSQL Library inladen
+
 var mysql = require('mysql');
 var config = require('../config/config');
 
@@ -47,3 +78,4 @@ function handleDisconnect() {
 handleDisconnect();
 
 module.exports = connection;
+*/

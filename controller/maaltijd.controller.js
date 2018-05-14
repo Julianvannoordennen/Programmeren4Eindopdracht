@@ -4,11 +4,12 @@
 const ApiError = require('../model/ApiError')
 const assert = require('assert')
 const db = require('../config/db');
+const Maaltijd = require('../Model/Maaltijd')
 
 module.exports = {
-  console.log("1")
   maakNieuweMaaltijd(req, res, next) {
-    console.log("2")
+
+    console.log(1)
 
     try {
       assert(typeof(req.body) === 'object', 'request body must have an object.')
@@ -18,13 +19,12 @@ module.exports = {
       assert(typeof(req.body.allergie) === 'string', 'allergie moet text zijn.')
       assert(typeof(req.body.prijs) === 'number', 'prijs moet een getal zijn.')
 
-    } catch (ex) {
-      const error = new ApiError(ex.toString(), 422)
+    } catch (error) {
+      const error = new ApiError(error.toString(), 422)
       next(error)
       return
     }
-    console.log("3")
-
+    console.log(2)
     let maaltijd = new Maaltijd(
       req.body.naam,
       req.body.beschrijving,
@@ -32,18 +32,16 @@ module.exports = {
       req.body.allergie,
       req.body.prijs
     )
-    console.log("4")
-
+    console.log(3)
     let query = {
       sql: 'INSERT INTO maaltijd VALUES (?, ?, ?, ?, ?)',
       values: [maaltijd.naam, maaltijd.beschrijving, maaltijd.ingredienten, maaltijd.allergie, maaltijd.prijs],
       timeout: 2000
     }
-    console.log("5")
 
     db.query('query', (error, rows, fields) => {
       if (error) {
-        let error = new ApiError(ex.toString(), 422)
+        let error = new ApiError(error.toString(), 422)
         next(error);
       } else {
         res.status(200).json({
@@ -55,6 +53,7 @@ module.exports = {
         }).end()
       }
     })
+    console.log(4)
   },
 
 
@@ -69,11 +68,4 @@ module.exports = {
   verwijderMaaltijd(req, res, next) {
 
   },
-
-  catchAll(req, res, next) {
-    res.status(404)
-        .json({
-            message: 'Deze maaltijd endpoint bestaat nog niet!'
-        }).end()
-}
 }

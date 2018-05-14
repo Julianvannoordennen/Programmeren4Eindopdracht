@@ -74,23 +74,23 @@ module.exports = {
                 next(new ApiError('Invalid credentials, bye.', 401))
 
             } else {
-
+                
                 //Controleren of wachtwoord klopt
-                bcrypt.compare(person.password.trim(), result.password, (err, success) => {
+                bcrypt.compare(person.password.trim(), rows[0].Password.trim(), (err, success) => {
 
                     //Gelukt
                     if (success) {
                         
                         //Payload maken
                         const payload = {
-                            user: result.email,
+                            user: rows[0].Email,
                             role: 'admin, user'
                         }
 
                         //Informatie terugsturen die voor de gebruiker relevant is
                         const userinfo = { 
                             token: authentication.encodeToken(payload),
-                            email: result.email
+                            email: rows[0].Email
                         }
                         res.status(200).json(userinfo).end()
 

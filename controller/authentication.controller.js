@@ -76,7 +76,7 @@ module.exports = {
                 //Informatie terugsturen die voor de gebruiker relevant is
                 const userinfo = new ValidToken(
                   authentication.encodeToken(payload),
-                  rows[0].ID
+                  rows[0].email
                 );
                 res
                   .status(200)

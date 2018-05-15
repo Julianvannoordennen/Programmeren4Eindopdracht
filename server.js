@@ -2,17 +2,16 @@
 const express = require("express");
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
-const personRoutes = require('./routes/deelnemer.routes')
-const maaltijdRoutes = require('./routes/maaltijd.routes')
-const studentenhuisRoutes = require('./routes/studentenhuis.routes')
-const apiTest = require('./routes/test')
 
 //Project bestanden
-
 const ApiError = require('./model/ApiError')
 const settings = require('./config/config')
 const AuthController = require('./controller/authentication.controller')
 const authenticationRoutes = require('./routes/authentication.routes')
+const personRoutes = require('./routes/deelnemer.routes')
+const maaltijdRoutes = require('./routes/maaltijd.routes')
+const studentenhuisRoutes = require('./routes/studentenhuis.routes')
+const apiTest = require('./routes/test')
 
 //Express laden
 let app = express();
@@ -32,7 +31,6 @@ app.all('*', AuthController.validateToken);
 //Standaard endpoints
 app.use("/api/studentenhuis", personRoutes);
 app.use("/api/studentenhuis", maaltijdRoutes);
-app.use("/api/studentenhuis", studentenhuisRoutes);
 app.use("/test", apiTest)
 
 //Niet bestaande endpoint getriggerd

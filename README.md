@@ -1,2 +1,2 @@
-# Programmeren 4 Eindopdracht
+# Programmeren4Eindopdracht
 Programmeren 4 Eindopdracht

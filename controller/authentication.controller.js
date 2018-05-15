@@ -24,8 +24,7 @@ module.exports = {
             if (err) {
 
                 //Foutief token, ga naar error endpoint
-                const error = new ApiError(err.message || err, 401)
-                next(error)
+                next(new ApiError(err.message || err, 401))
 
             } else {
 
@@ -50,8 +49,7 @@ module.exports = {
         catch (ex) {
 
             //Foutieve input
-            const error = new ApiError(ex.toString(), 412)
-            next(error)
+            next(new ApiError(ex.toString(), 412))
             return
         }
 
@@ -118,8 +116,7 @@ module.exports = {
         catch (ex) {
 
             //Error
-            const error = new ApiError(ex.toString(), 412)
-            next(error)
+            next(new ApiError(ex.toString(), 412))
             return
         }
 
@@ -155,14 +152,14 @@ module.exports = {
                     if(err) {
 
                         //Email bestaat al
-                        const error = new ApiError(err, 412)
-                        next(error)
+                        next(new ApiError(err, 412))
 
                     } else {
 
                         //Payload maken
                         const payload = {
                             user: person.email,
+                            id: rows.insertId,
                             role: 'admin, user'
                         }
 

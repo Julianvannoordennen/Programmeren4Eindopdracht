@@ -14,7 +14,7 @@ function encodeToken(data) {
         iat: moment().unix(),
         sub: data
     }
-console.log(settings.secretkey);
+    
     //Encoding terugsturen
     return jwt.encode(payload, settings.secretkey)
 }

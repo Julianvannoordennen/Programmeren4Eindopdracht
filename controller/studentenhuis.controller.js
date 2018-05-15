@@ -26,58 +26,70 @@ module.exports = {
     //Studentenhuis maken
     const studentenhuis = new Studentenhuis(req.body.naam, req.body.adres);
 
-    //Studentenhuis toevoegen
-    db.query(
-      {
-        sql: "INSERT INTO studentenhuis VALUES(null,?,?," + 1 + ")",
-        values: [
-          studentenhuis.naam,
-          studentenhuis.adres
-        ],
-        timeout: 2000
-      },
-      (ex, rows, fields) => {
-        if (ex) {
-          //Error
-          const error = new ApiError(ex, 412);
-          next(error);
-        } else {
-          //Laatste id verkrijgen
-          const lastID = rows.insertId;
+    //Token uit header halen
+    const token = req.header('x-access-token') || ''
+    
+    //Token decoderen
+    authentication.decodeToken(token, (err, payload) => {
 
-          //Studentenhuis van view verkrijgen
-          db.query(
-            {
-              sql: "SELECT * FROM view_studentenhuis WHERE ID = " + lastID,
-              timeout: 2000
-            },
-            (ex, rows, fields) => {
-              if (ex) {
-                //Error
-                const error = new ApiError(ex, 412);
-                next(error);
-              } else {
-                //Array maken en alles omzetten
-                const row = rows[0];
-                const response = new StudentenhuisResponse(
-                  row.ID,
-                  row.Naam,
-                  row.Adres,
-                  row.Contact,
-                  row.Email
-                );
+      if (err) {
 
-                //Correct, stuur studentenhuizen terug
-                res
-                  .status(200)
-                  .json(response)
-                  .end();
-              }
+        //Foutief token, ga naar error endpoint
+        next(new ApiError(err.message || err, 401))
+
+      } else {
+
+        //Studentenhuis toevoegen
+        db.query(
+          {
+            sql: "INSERT INTO studentenhuis VALUES(null,?,?," + payload.sub.id + ")",
+            values: [
+              studentenhuis.naam,
+              studentenhuis.adres
+            ],
+            timeout: 2000
+          },
+          (ex, rows, fields) => {
+            if (ex) {
+              next(new ApiError(ex, 412));
+            } else {
+              //Laatste id verkrijgen
+              const lastID = rows.insertId;
+
+              //Studentenhuis van view verkrijgen
+              db.query(
+                {
+                  sql: "SELECT * FROM view_studentenhuis WHERE ID = " + lastID,
+                  timeout: 2000
+                },
+                (ex, rows, fields) => {
+                  if (ex) {
+                    //Error
+                    next(new ApiError(ex, 412));
+                  } else {
+                    //Array maken en alles omzetten
+                    const row = rows[0];
+                    const response = new StudentenhuisResponse(
+                      row.ID,
+                      row.Naam,
+                      row.Adres,
+                      row.Contact,
+                      row.Email
+                    );
+
+                    //Correct, stuur studentenhuizen terug
+                    res
+                      .status(200)
+                      .json(response)
+                      .end();
+                  }
+                }
+              );
             }
-          );
-        }
+          }
+        );
       }
-    );
+    })
   },
 
   /*************************************************\
@@ -233,7 +245,7 @@ module.exports = {
               values: [studentenhuis.naam, studentenhuis.adres],
               timeout: 2000
             }, (error, rows, fields) => {
-      console.log(rows.length);
+              
               if (error) {
 
                 //Als er een error is stuur een api error

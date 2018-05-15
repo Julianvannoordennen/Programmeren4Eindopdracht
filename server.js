@@ -31,6 +31,7 @@ app.all('*', AuthController.validateToken);
 //Standaard endpoints
 app.use("/api/studentenhuis", personRoutes);
 app.use("/api/studentenhuis", maaltijdRoutes);
+app.use("/api/studentenhuis", studentenhuisRoutes);
 app.use("/test", apiTest)
 
 //Niet bestaande endpoint getriggerd

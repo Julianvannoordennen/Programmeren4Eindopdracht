@@ -287,28 +287,22 @@ describe('Studentenhuis API DELETE', () => {
                 error.should.have.property('datetime')
                 done()
         })
-        done()
     })
 
     //Volgens swagger hoort er alleen een lege response terug te komen ...
     it('should return a studentenhuis when posting a valid object', (done) => {
-        /*const token = require('./authentication.routes.test').token
+        const token = require('./authentication.routes.test').token
         chai.request(server)
             .delete(endpoint + "/" + studentenhuisID)
             .set("x-access-token",token)
-            .send({
-                'naam': 'test'
-            })
             .end((err, res) => {
-                res.should.have.status(412)
+                res.should.have.status(200)
                 res.body.should.be.a('object')
 
                 const error = res.body
-                error.should.have.property('message')
-                error.should.have.property('code').equals(412)
-                error.should.have.property('datetime')
+                error.should.have.property('removed')
                 done()
-        })*/done()
+        })
     })
 
     it('should throw an error when naam is missing', (done) => {

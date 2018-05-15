@@ -12,6 +12,10 @@ module.exports = {
   \***********************************************************/
   registreerVoorMaaltijd(req, res, next) {
 
+    //Verkrijg IDs en controleer of het nummers zijn
+    const huisId = Number(req.params.huisId)
+    const maaltijdId = Number(req.params.maaltijdId)
+
     //Testen
     try {
       assert(typeof (huisId) === 'number', 'huisId must be a number.')
@@ -84,19 +88,14 @@ module.exports = {
     })
   },
 
-
-
-
-
-
-
-
-
-
   /*******************************************************\
   ***** Verwijder deelnemers met huisID en maaltijdID *****
   \*******************************************************/
   verwijderDeelnemer(req, res, next) {
+
+    //Verkrijg IDs en controleer of het nummers zijn
+    const huisId = Number(req.params.huisId)
+    const maaltijdId = Number(req.params.maaltijdId)
 
     //Testen
     try {
@@ -111,5 +110,62 @@ module.exports = {
       return
     }
 
+    //Token uit header halen
+    const token = req.header('x-access-token') || ''
+
+    //Token decoderen
+    authentication.decodeToken(token, (err, payload) => {
+
+      if (err) {
+
+        //Foutief token, ga naar error endpoint
+        next(new ApiError(err.message || err, 401))
+
+      } else {
+
+        //Voer query uit die het item in deelnemer verwijderd
+        db.query({
+          sql: "SELECT UserID FROM deelnemers WHERE StudentenhuisID=" + huisId + " AND MaaltijdID=" + maaltijdId,
+          timeout: 2000
+        }, (ex, rows, fields) => {
+
+          //Error
+          if (ex) {
+
+            next(new ApiError(ex.toString(), 404));
+
+          } else if (rows.length == 0) {
+
+            //Geen rows geselecteerd, deelnemer is niet gevonden
+            next(new ApiError("Deelnemer not found", 404))
+
+          } else {
+
+            //Voer query uit die het item in deelnemers verwijderd
+            db.query({
+              sql: 'DELETE FROM deelnemers WHERE UserID=' + payload.sub.id + " AND StudentenhuisID=" + huisId + " AND MaaltijdID=" + maaltijdId,
+              timeout: 2000
+            }, (ex, rows, fields) => {
+
+              //Error
+              if (ex) {
+
+                next(new ApiError(ex.toString(), 404));
+
+              } else if (rows.affectedRows == 0) {
+
+                //Geen rows veranderd, deelnemer is niet gevonden
+                next(new ApiError("User is not authorized to remove StudentenhuisID " + huisId + " with MaaltijdID " + maaltijdId, 409));
+
+              } else {
+
+                //Correct, stuur succes terug
+                res.status(200).json({'removed': 'succesfull'}).end()
+              }
+            })
+          }
+        })
+      }
+    })
   }
 }

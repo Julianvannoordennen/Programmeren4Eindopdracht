@@ -29,12 +29,58 @@ module.exports = {
       return
     }
 
+    //Token uit header halen
+    const token = req.header('x-access-token') || ''
+    
+    //Token decoderen
+    authentication.decodeToken(token, (err, payload) => {
+
+      if (err) {
+
+        //Foutief token, ga naar error endpoint
+        next(new ApiError(err.message || err, 401))
+
+      } else {
+
+        //Deelnemer toevoegen
+        db.query({
+            sql: "INSERT INTO deelnemers VALUES(" + payload.sub.id + "," + huisId + ", " + maaltijdId + ")",
+            timeout: 2000
+          }, (ex, rows, fields) => {
+            if (ex) {
+              
+              //Dubbele waarde of onbestaande kolom
+              if (ex.errno == 1062) { next(new ApiError("User has already signed in for this combination of HuisId and MaaltijdId", 409));}
+              else if (ex.errno == 1452) { next(new ApiError("Combination of HuisId and MaaltijdId does not exist", 404));}
+              else {next(new ApiError(ex, 404));}
+            } else {
+
+              //Deelnemer van view verkrijgen
+              db.query({
+                  sql: "SELECT * FROM view_deelnemers WHERE StudentenhuisID=" + huisId + " AND MaaltijdID=" + maaltijdId + " AND Email=(SELECT Email FROM user WHERE ID=" + payload.sub.id + ")",
+                  timeout: 2000
+                },(ex, rows, fields) => {
+                  if (ex) {
+
+                    //Error
+                    next(new ApiError(ex, 412));
+                  } else {
+
+                    //Array maken en alles omzetten
+                    const row = rows[0];
+                    const response = new DeelnemerResponse(row.Voornaam, row.Achternaam, row.Email)
+
+                    //Correct, stuur deelnemer terug
+                    res.status(200).json(response).end();
+                  }
+                }
+              );
+            }
+          }
+        );
+      }
+    })
   },
-
-
-
-
-
 
   /***************************************************\
   ***** Krijg deelnemers met huisID en maaltijdID *****

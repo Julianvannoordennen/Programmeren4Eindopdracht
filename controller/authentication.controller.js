@@ -24,8 +24,8 @@ module.exports = {
         next(error);
       } else {
         //Correct
-        console.log("Authenticated! Payload = ");
-        console.dir(payload);
+        //console.log("Authenticated! Payload = ");
+        //console.dir(payload);
         req.user = payload.sub;
         next();
       }
@@ -37,10 +37,7 @@ module.exports = {
     //Input controleren
     try {
       assert(typeof req.body.email === "string", "email must be a string.");
-      assert(
-        typeof req.body.password === "string",
-        "password must be a string."
-      );
+      assert(typeof req.body.password === "string", "password must be a string.");
     } catch (ex) {
       //Foutieve input
       const error = new ApiError(ex.toString(), 412);
@@ -73,8 +70,7 @@ module.exports = {
               if (success) {
                 //Payload maken
                 const payload = {
-                  user: rows[0].Email,
-                  role: "admin, user"
+                  id: rows[0].ID
                 };
 
                 //Informatie terugsturen die voor de gebruiker relevant is
@@ -162,8 +158,7 @@ module.exports = {
               } else {
                 //Payload maken
                 const payload = {
-                  user: person.email,
-                  role: "admin, user"
+                  id: rows.insertId
                 };
 
                 //Token terugsturen

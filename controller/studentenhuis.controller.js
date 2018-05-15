@@ -7,7 +7,7 @@ const db = require("../config/db");
 const assert = require("assert");
 
 module.exports = {
-  
+
   /******************************************\
   ***** Voeg een nieuw studentenhuis toe *****
   \******************************************/
@@ -28,7 +28,7 @@ module.exports = {
 
     //Token uit header halen
     const token = req.header('x-access-token') || ''
-    
+
     //Token decoderen
     authentication.decodeToken(token, (err, payload) => {
 
@@ -42,10 +42,12 @@ module.exports = {
         //Studentenhuis toevoegen
         db.query(
           {
-            sql: "INSERT INTO studentenhuis VALUES(null,?,?," + payload.sub.id + ")",
+            sql: "INSERT INTO studentenhuis VALUES(?, ?, ?, ?)",
             values: [
+              null,
               studentenhuis.naam,
-              studentenhuis.adres
+              studentenhuis.adres,
+              payload.sub.id
             ],
             timeout: 2000
           },
@@ -245,17 +247,17 @@ module.exports = {
               values: [studentenhuis.naam, studentenhuis.adres],
               timeout: 2000
             }, (error, rows, fields) => {
-              
+
               if (error) {
 
                 //Als er een error is stuur een api error
                 next(new ApiError(error.toString(), 422))
 
               } else if (rows.affectedRows == 0) {
-        
+
                 //Geen rows veranderd, studentenhuis is niet van gebruiker
                 next(new ApiError("User is not authorized to remove ID " + id, 409));
-        
+
               } else {
 
                 //Voer query uit die 1 item uit studentenhuis haalt

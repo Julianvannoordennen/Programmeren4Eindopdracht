@@ -6,7 +6,10 @@ const db = require("../config/db");
 const assert = require("assert");
 
 module.exports = {
-  /***** Voeg een nieuw studentenhuis toe *****/
+  
+  /******************************************\
+  ***** Voeg een nieuw studentenhuis toe *****
+  \******************************************/
   maakNieuwStudentenhuis(req, res, next) {
     //Controleren of de meegestuurde gegevens kloppen
     try {
@@ -29,7 +32,7 @@ module.exports = {
         values: [
           studentenhuis.naam,
           studentenhuis.adres
-        ] /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */,
+        ],
         timeout: 2000
       },
       (ex, rows, fields) => {
@@ -76,7 +79,9 @@ module.exports = {
     );
   },
 
-  /***** Krijg een arraylist met studentenhuizen *****/
+  /*************************************************\
+  ***** Krijg een arraylist met studentenhuizen *****
+  \*************************************************/
   krijgStudentenHuizen(req, res, next) {
     //Voer query uit die alle items uit studentenhuis
     db.query(
@@ -114,7 +119,9 @@ module.exports = {
     );
   },
 
-  /***** Zoek een specifiek studentenhuis op bij ID *****/
+  /****************************************************\
+  ***** Zoek een specifiek studentenhuis op bij ID *****
+  \****************************************************/
   krijgStudentenhuis(req, res, next) {
     //Verkrijg ID en controleer of het een nummer is
     const id = Number(req.params.huisId)
@@ -159,7 +166,7 @@ module.exports = {
         //Correct, stuur studentenhuizen terug
         res.status(200).json(response).end()
       }
-    );
+    })
   },
 
   /****************************************************\
@@ -178,8 +185,6 @@ module.exports = {
         next(new ApiError(ex.toString(), 412))
         return
     }
-
-    /*********************** */
   },
 
   /******************************************************\

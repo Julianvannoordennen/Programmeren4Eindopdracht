@@ -1,39 +1,29 @@
 //Studentenhuis
-const ApiError = require('../model/ApiError')
-const Studentenhuis = require('../model/Studentenhuis')
-const StudentenhuisResponse = require('../model/StudentenhuisResponse')
-const authentication = require('../util/auth/authentication')
-const db = require('../config/db');
-const assert = require('assert')
+const ApiError = require("../model/ApiError");
+const Studentenhuis = require("../model/Studentenhuis");
+const StudentenhuisResponse = require("../model/StudentenhuisResponse");
+const db = require("../config/db");
+const assert = require("assert");
 
 module.exports = {
-
-  /******************************************\
-  ***** Voeg een nieuw studentenhuis toe *****
-  \******************************************/
+  /***** Voeg een nieuw studentenhuis toe *****/
   maakNieuwStudentenhuis(req, res, next) {
-
     //Controleren of de meegestuurde gegevens kloppen
     try {
-      assert(typeof (req.body.naam) === 'string', 'naam must be a string.')
-      assert(typeof (req.body.adres) === 'string', 'adres must be a string.')
-    }
-    catch (ex) {
-
+      assert(typeof req.body.naam === "string", "naam must be a string.");
+      assert(typeof req.body.adres === "string", "adres must be a string.");
+    } catch (ex) {
       //Error
       next(new ApiError(ex.toString(), 412))
       return
     }
 
     //Studentenhuis maken
-    const studentenhuis = new Studentenhuis(
-      req.body.naam,
-      req.body.adres
-    )
+    const studentenhuis = new Studentenhuis(req.body.naam, req.body.adres);
 
     //Token uit header halen
     const token = req.header('x-access-token') || ''
-    
+
     //Token decoderen
     authentication.decodeToken(token, (err, payload) => {
 
@@ -43,7 +33,7 @@ module.exports = {
         next(new ApiError(err.message || err, 401))
 
       } else {
-        
+
         //Studentenhuis toevoegen
         db.query({
           sql: "INSERT INTO studentenhuis SELECT null, ?, ?, " + payload.sub.id,
@@ -90,7 +80,7 @@ module.exports = {
           }
         })
       }
-    })
+    );
   },
 
   /*************************************************\
@@ -125,14 +115,11 @@ module.exports = {
         //Correct, stuur studentenhuizen terug
         res.status(200).json(response).end()
       }
-    })
+    );
   },
 
-  /****************************************************\
-  ***** Zoek een specifiek studentenhuis op bij ID *****
-  \****************************************************/
+  /***** Zoek een specifiek studentenhuis op bij ID *****/
   krijgStudentenhuis(req, res, next) {
-
     //Verkrijg ID en controleer of het een nummer is
     const id = Number(req.params.huisId)
     
@@ -176,7 +163,7 @@ module.exports = {
         //Correct, stuur studentenhuizen terug
         res.status(200).json(response).end()
       }
-    })
+    );
   },
 
   /****************************************************\
@@ -218,7 +205,7 @@ module.exports = {
 
     //Token uit header halen
     const token = req.header('x-access-token') || ''
-    
+
     //Token decoderen
     authentication.decodeToken(token, (err, payload) => {
 

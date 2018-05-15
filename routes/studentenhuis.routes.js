@@ -1,8 +1,8 @@
 //
 // Authentication routes
 //
-const routes = require('express').Router();
-const studentenhuisController = require('../controller/studentenhuis.controller.js')
+const routes = require("express").Router()
+const studentenhuisController = require("../controller/studentenhuis.controller.js")
 
 //const AuthController = require('../controllers/authentication.controller')
 

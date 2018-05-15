@@ -1,8 +1,8 @@
 //
 // Authentication routes
 //
-const routes = require('express').Router();
-const deelnemerController = require('../controller/deelnemer.controller.js')
+const routes = require("express").Router()
+const deelnemerController = require("../controller/deelnemer.controller.js")
 
 //const AuthController = require('../controllers/authentication.controller')
 

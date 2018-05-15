@@ -117,54 +117,147 @@ module.exports = {
   /***** Zoek een specifiek studentenhuis op bij ID *****/
   krijgStudentenhuis(req, res, next) {
     //Verkrijg ID en controleer of het een nummer is
-    const id = parseInt(req.params.huisId);
+    const id = Number(req.params.huisId)
+
     try {
-      assert(typeof id === "number", "huisId must be a number.");
-      assert(id === NaN, "huisId must be a number.");
-    } catch (ex) {
-      const error = new ApiError(ex.toString(), 412);
-      next(error);
-      return;
+        assert(typeof (id) === 'number', 'huisId must be a number.')
+        assert(!isNaN(id), 'huisId must be a number.')
+    }
+    catch (ex) {
+        next(new ApiError(ex.toString(), 412))
+        return
     }
 
     //Voer query uit die alle items uit studentenhuis
-    db.query(
-      {
-        sql: "SELECT * FROM view_studentenhuis WHERE id=" + id,
-        timeout: 2000
-      },
-      (ex, rows, fields) => {
-        //Error
-        if (ex) {
-          let error = new ApiError(ex.toString(), 404);
-          next(error);
-        } else if (rows.length == 0) {
-          let error = new ApiError("ID " + id + " not found", 404);
-          next(error);
-        } else {
-          //Verkrijg correcte row
-          const row = rows[0];
+    db.query({
+      sql: "SELECT * FROM view_studentenhuis WHERE ID = " + id,
+      timeout: 2000
+    }, (ex, rows, fields) => {
 
-          //Array maken en alles omzetten
-          const response = new StudentenhuisResponse(
-            row.ID,
-            row.Naam,
-            row.Adres,
-            row.Contact,
-            row.Email
-          );
+      //Error
+      if (ex) {
+        next(new ApiError(ex.toString(), 404));
 
-          //Correct, stuur studentenhuizen terug
-          res
-            .status(200)
-            .json(response)
-            .end();
-        }
+      } else if (rows.length == 0) {
+
+        next(new ApiError("ID " + id + " not found", 404));
+
+      } else {
+
+        //Verkrijg correcte row
+        const row = rows[0];
+
+        //Array maken en alles omzetten
+        const response = new StudentenhuisResponse(
+          row.ID,
+          row.Naam,
+          row.Adres,
+          row.Contact,
+          row.Email
+        )
+
+        //Correct, stuur studentenhuizen terug
+        res.status(200).json(response).end()
       }
     );
   },
 
-  vervangStudentenhuis(req, res, next) {},
+  /****************************************************\
+  ***** Vervang een specifiek studentenhuis bij ID *****
+  \****************************************************/
+  vervangStudentenhuis(req, res, next) {
 
-  verwijderStudentenhuis(req, res, next) {}
-};
+    //Verkrijg ID en controleer of het een nummer is
+    const id = Number(req.params.huisId)
+
+    try {
+        assert(typeof (id) === 'number', 'huisId must be a number.')
+        assert(!isNaN(id), 'huisId must be a number.')
+    }
+    catch (ex) {
+        next(new ApiError(ex.toString(), 412))
+        return
+    }
+
+    /*********************** */
+  },
+
+  /******************************************************\
+  ***** Verwijder een specifiek studentenhuis bij ID *****
+  \******************************************************/
+  verwijderStudentenhuis(req, res, next) {
+
+    //Verkrijg ID en controleer of het een nummer is
+    const id = Number(req.params.huisId);
+
+    try {
+      assert(typeof (id) === 'number', 'huisId must be a number.')
+      assert(!isNaN(id), 'huisId must be a number.')
+    }
+    catch (ex) {
+        next(new ApiError(ex.toString(), 412))
+        return
+    }
+
+    //Token uit header halen
+    const token = req.header('x-access-token') || ''
+
+    //Token decoderen
+    authentication.decodeToken(token, (err, payload) => {
+
+      if (err) {
+
+        //Foutief token, ga naar error endpoint
+        next(new ApiError(err.message || err, 401))
+
+      } else {
+
+        //Voer query uit die het item in studentenhuis verwijderd
+        db.query({
+          sql: 'SELECT ID FROM studentenhuis WHERE ID=' + id,
+          timeout: 2000
+        }, (ex, rows, fields) => {
+
+          //Error
+          if (ex) {
+
+            next(new ApiError(ex.toString(), 404));
+
+          } else if (rows.length == 0) {
+
+            //Geen rows veranderd, studentenhuis is niet gevonden
+            next(new ApiError("ID " + id + " not found", 404));
+
+          } else {
+
+            //Voer query uit die het item in studentenhuis verwijderd
+            db.query({
+              sql: 'DELETE FROM studentenhuis WHERE ID=' + id + " AND UserID = " + payload.sub.id,
+              timeout: 2000
+            }, (ex, rows, fields) => {
+
+              //Error
+              if (ex) {
+
+                next(new ApiError(ex.toString(), 404));
+
+              } else if (rows.affectedRows == 0) {
+
+                //Geen rows veranderd, studentenhuis is niet gevonden
+                next(new ApiError("User is not authorized to remove ID " + id, 409));
+
+              } else {
+
+                //Correct, stuur studentenhuizen terug
+                const response = {
+                  'removed': 'succesfull'
+                }
+                res.status(200).json(response).end()
+              }
+            })
+          }
+        })
+      }
+    })
+  }
+}

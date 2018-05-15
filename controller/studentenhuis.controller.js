@@ -135,8 +135,10 @@ module.exports = {
 
     //Verkrijg ID en controleer of het een nummer is
     const id = Number(req.params.huisId)
+    
     try {
         assert(typeof (id) === 'number', 'huisId must be a number.')
+        assert(!isNaN(id), 'huisId must be a number.')
     }
     catch (ex) {
         next(new ApiError(ex.toString(), 412))
@@ -145,8 +147,7 @@ module.exports = {
 
     //Voer query uit die alle items uit studentenhuis
     db.query({
-      sql: "DELETE FROM studentenhuis WHERE ID = ? AND UserID = ?",
-      values: [studentenhuis.naam, studentenhuis.adres],
+      sql: "SELECT * FROM view_studentenhuis WHERE ID = " + id,
       timeout: 2000
     }, (ex, rows, fields) => {
 
@@ -182,6 +183,20 @@ module.exports = {
   ***** Vervang een specifiek studentenhuis bij ID *****
   \****************************************************/
   vervangStudentenhuis(req, res, next) {
+
+    //Verkrijg ID en controleer of het een nummer is
+    const id = Number(req.params.huisId)
+    
+    try {
+        assert(typeof (id) === 'number', 'huisId must be a number.')
+        assert(!isNaN(id), 'huisId must be a number.')
+    }
+    catch (ex) {
+        next(new ApiError(ex.toString(), 412))
+        return
+    }
+
+    /*********************** */
   },
 
   /******************************************************\
@@ -190,11 +205,11 @@ module.exports = {
   verwijderStudentenhuis(req, res, next) {
 
     //Verkrijg ID en controleer of het een nummer is
-    const id = req.params.huisId;
-    console.log(typeof (id) + ": " + id)
+    const id = Number(req.params.huisId);
+    
     try {
-        assert(typeof (id) === 'number', 'huisId must be a number.')
-        assert(id !== NaN, 'huisId must be a number.')
+      assert(typeof (id) === 'number', 'huisId must be a number.')
+      assert(!isNaN(id), 'huisId must be a number.')
     }
     catch (ex) {
         next(new ApiError(ex.toString(), 412))
@@ -216,7 +231,7 @@ module.exports = {
 
         //Voer query uit die het item in studentenhuis verwijderd
         db.query({
-          sql: 'DELETE FROM studentenhuis WHERE ID=' + id + " AND UserID = " + payload.sub.id,
+          sql: 'SELECT ID FROM studentenhuis WHERE ID=' + id,
           timeout: 2000
         }, (ex, rows, fields) => {
 
@@ -225,12 +240,38 @@ module.exports = {
 
             next(new ApiError(ex.toString(), 404));
 
+          } else if (rows.length == 0) {
+            
+            //Geen rows veranderd, studentenhuis is niet gevonden
+            next(new ApiError("ID " + id + " not found", 404));
+
           } else {
 
-            console.log("heuj")
+            //Voer query uit die het item in studentenhuis verwijderd
+            db.query({
+              sql: 'DELETE FROM studentenhuis WHERE ID=' + id + " AND UserID = " + payload.sub.id,
+              timeout: 2000
+            }, (ex, rows, fields) => {
 
-            //Correct, stuur studentenhuizen terug
-            res.status(200).json(response).end()
+              //Error
+              if (ex) {
+
+                next(new ApiError(ex.toString(), 404));
+
+              } else if (rows.affectedRows == 0) {
+                
+                //Geen rows veranderd, studentenhuis is niet gevonden
+                next(new ApiError("User is not authorized to remove ID " + id, 409));
+
+              } else {
+
+                //Correct, stuur studentenhuizen terug
+                const response = {
+                  'removed': 'succesfull'
+                }
+                res.status(200).json(response).end()
+              }
+            })
           }
         })
       }

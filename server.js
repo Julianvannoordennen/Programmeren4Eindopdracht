@@ -27,11 +27,9 @@ app.use(morgan("dev"));
 app.use('/api', authenticationRoutes)
 
 //Authenticatie voor alle standaard endpoints
-/*
 app.all('*', AuthController.validateToken);
-*/
-//Standaard endpoints
 
+//Standaard endpoints
 app.use("/api/studentenhuis", personRoutes);
 app.use("/api/studentenhuis", maaltijdRoutes);
 app.use("/api/studentenhuis", studentenhuisRoutes);

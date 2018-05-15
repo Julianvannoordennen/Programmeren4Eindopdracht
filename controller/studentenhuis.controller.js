@@ -2,6 +2,7 @@
 const ApiError = require("../model/ApiError");
 const Studentenhuis = require("../model/Studentenhuis");
 const StudentenhuisResponse = require("../model/StudentenhuisResponse");
+const authentication = require("../util/auth/authentication");
 const db = require("../config/db");
 const assert = require("assert");
 
@@ -180,11 +181,109 @@ module.exports = {
     try {
         assert(typeof (id) === 'number', 'huisId must be a number.')
         assert(!isNaN(id), 'huisId must be a number.')
+        assert(typeof req.body === "object", "request body must have an object.")
+        assert(typeof req.body.naam === "string", "name must be a string.")
+        assert(typeof req.body.adres === "string", "adres must be a string")
     }
     catch (ex) {
         next(new ApiError(ex.toString(), 412))
         return
     }
+
+    //Maak een nieuwe studentenhuis aan
+    const studentenhuis = new Studentenhuis(
+      req.body.naam,
+      req.body.adres
+    )
+
+    //Voer query uit die het item in studentenhuis verwijderd
+    db.query({
+      sql: 'SELECT ID FROM studentenhuis WHERE ID=' + id,
+      timeout: 2000
+    }, (ex, rows, fields) => {
+
+      //Error
+      if (ex) {
+
+        next(new ApiError(ex.toString(), 404));
+
+      } else if (rows.length == 0) {
+
+        //Geen rows veranderd, studentenhuis is niet gevonden
+        next(new ApiError("ID " + id + " not found", 404));
+
+      } else {
+
+        //Token uit header halen
+        const token = req.header('x-access-token') || ''
+
+        //Token decoderen
+        authentication.decodeToken(token, (err, payload) => {
+
+          if (err) {
+
+            //Foutief token, ga naar error endpoint
+            next(new ApiError(err.message || err, 401))
+
+          } else {
+
+            //Voer query uit
+            db.query({
+              sql: "UPDATE studentenhuis set Naam = ?, Adres = ? WHERE ID = " + id + " AND UserID = " + payload.sub.id,
+              values: [studentenhuis.naam, studentenhuis.adres],
+              timeout: 2000
+            }, (error, rows, fields) => {
+      console.log(rows.length);
+              if (error) {
+
+                //Als er een error is stuur een api error
+                next(new ApiError(error.toString(), 422))
+
+              } else if (rows.affectedRows == 0) {
+        
+                //Geen rows veranderd, studentenhuis is niet van gebruiker
+                next(new ApiError("User is not authorized to remove ID " + id, 409));
+        
+              } else {
+
+                //Voer query uit die 1 item uit studentenhuis haalt
+                db.query({
+                  sql: "SELECT * FROM view_studentenhuis WHERE ID = " + id,
+                  timeout: 2000
+                }, (ex, rows, fields) => {
+
+                  //Error
+                  if (ex) {
+                    next(new ApiError(ex.toString(), 404));
+
+                  } else if (rows.length == 0) {
+
+                    next(new ApiError("ID " + id + " not found", 404));
+
+                  } else {
+
+                    //Verkrijg correcte row
+                    const row = rows[0];
+
+                    //Array maken en alles omzetten
+                    const response = new StudentenhuisResponse(
+                      row.ID,
+                      row.Naam,
+                      row.Adres,
+                      row.Contact,
+                      row.Email
+                    )
+
+                    //Correct, stuur studentenhuizen terug
+                    res.status(200).json(response).end()
+                  }
+                })
+              }
+            })
+          }
+        })
+      }
+    })
   },
 
   /******************************************************\

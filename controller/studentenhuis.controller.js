@@ -14,57 +14,47 @@ module.exports = {
       assert(typeof req.body.adres === "string", "adres must be a string.");
     } catch (ex) {
       //Error
-      next(new ApiError(ex.toString(), 412))
-      return
+      const error = new ApiError(ex.toString(), 412);
+      next(error);
+      return;
     }
 
     //Studentenhuis maken
     const studentenhuis = new Studentenhuis(req.body.naam, req.body.adres);
 
-    //Token uit header halen
-    const token = req.header('x-access-token') || ''
+    //Studentenhuis toevoegen
+    db.query(
+      {
+        sql: "INSERT INTO studentenhuis VALUES(null,?,?," + 1 + ")",
+        values: [
+          studentenhuis.naam,
+          studentenhuis.adres
+        ] /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */,
+        timeout: 2000
+      },
+      (ex, rows, fields) => {
+        if (ex) {
+          //Error
+          const error = new ApiError(ex, 412);
+          next(error);
+        } else {
+          //Laatste id verkrijgen
+          const lastID = rows.insertId;
 
-    //Token decoderen
-    authentication.decodeToken(token, (err, payload) => {
-
-      if (err) {
-
-        //Foutief token, ga naar error endpoint
-        next(new ApiError(err.message || err, 401))
-
-      } else {
-
-        //Studentenhuis toevoegen
-        db.query({
-          sql: "INSERT INTO studentenhuis SELECT null, ?, ?, " + payload.sub.id,
-          values: [studentenhuis.naam, studentenhuis.adres],
-          timeout: 2000
-        }, (ex, rows, fields) => {
-
-          if(ex) {
-
-            //Error
-            next(new ApiError(ex, 412))
-
-          } else {
-
-            //Laatste id verkrijgen
-            const lastID = rows.insertId
-
-            //Studentenhuis van view verkrijgen
-            db.query({
+          //Studentenhuis van view verkrijgen
+          db.query(
+            {
               sql: "SELECT * FROM view_studentenhuis WHERE ID = " + lastID,
               timeout: 2000
-            }, (ex, rows, fields) => {
-              if(ex) {
-
+            },
+            (ex, rows, fields) => {
+              if (ex) {
                 //Error
-                next(new ApiError(ex, 412))
-
+                const error = new ApiError(ex, 412);
+                next(error);
               } else {
-
                 //Array maken en alles omzetten
-                const row = rows[0]
+                const row = rows[0];
                 const response = new StudentenhuisResponse(
                   row.ID,
                   row.Naam,
@@ -74,46 +64,52 @@ module.exports = {
                 );
 
                 //Correct, stuur studentenhuizen terug
-                res.status(200).json(response).end()
+                res
+                  .status(200)
+                  .json(response)
+                  .end();
               }
-            })
-          }
-        })
+            }
+          );
+        }
       }
     );
   },
 
-  /*************************************************\
-  ***** Krijg een arraylist met studentenhuizen *****
-  \*************************************************/
+  /***** Krijg een arraylist met studentenhuizen *****/
   krijgStudentenHuizen(req, res, next) {
+    //Voer query uit die alle items uit studentenhuis
+    db.query(
+      {
+        sql: "SELECT * FROM view_studentenhuis",
+        timeout: 2000
+      },
+      (ex, rows, fields) => {
+        //Error
+        if (ex) {
+          let error = new ApiError(ex.toString(), 422);
+          next(error);
+        } else {
+          //Array maken en alles omzetten
+          let response = new Array();
+          rows.forEach(row => {
+            response.push(
+              new StudentenhuisResponse(
+                row.ID,
+                row.Naam,
+                row.Adres,
+                row.Contact,
+                row.Email
+              )
+            );
+          });
 
-    //Voer query uit die één items uit studentenhuis haalt
-    db.query({
-      sql: 'SELECT * FROM view_studentenhuis',
-      timeout: 2000
-    }, (ex, rows, fields) => {
-
-      //Error
-      if (ex) {
-        next(new ApiError(ex.toString(), 422));
-
-      } else {
-
-        //Array maken en alles omzetten
-        let response = new Array();
-        rows.forEach(row => {
-          response.push(new StudentenhuisResponse(
-            row.ID,
-            row.Naam,
-            row.Adres,
-            row.Contact,
-            row.Email
-          ))
-        });
-
-        //Correct, stuur studentenhuizen terug
-        res.status(200).json(response).end()
+          //Correct, stuur studentenhuizen terug
+          res
+            .status(200)
+            .json(response)
+            .end();
+        }
       }
     );
   },
@@ -121,106 +117,54 @@ module.exports = {
   /***** Zoek een specifiek studentenhuis op bij ID *****/
   krijgStudentenhuis(req, res, next) {
     //Verkrijg ID en controleer of het een nummer is
-    const id = Number(req.params.huisId)
+    const id = parseInt(req.params.huisId);
     try {
-        assert(typeof (id) === 'number', 'huisId must be a number.')
-    }
-    catch (ex) {
-        next(new ApiError(ex.toString(), 412))
-        return
+      assert(typeof id === "number", "huisId must be a number.");
+      assert(id === NaN, "huisId must be a number.");
+    } catch (ex) {
+      const error = new ApiError(ex.toString(), 412);
+      next(error);
+      return;
     }
 
     //Voer query uit die alle items uit studentenhuis
-    db.query({
-      sql: "DELETE FROM studentenhuis WHERE ID = ? AND UserID = ?",
-      values: [studentenhuis.naam, studentenhuis.adres],
-      timeout: 2000
-    }, (ex, rows, fields) => {
+    db.query(
+      {
+        sql: "SELECT * FROM view_studentenhuis WHERE id=" + id,
+        timeout: 2000
+      },
+      (ex, rows, fields) => {
+        //Error
+        if (ex) {
+          let error = new ApiError(ex.toString(), 404);
+          next(error);
+        } else if (rows.length == 0) {
+          let error = new ApiError("ID " + id + " not found", 404);
+          next(error);
+        } else {
+          //Verkrijg correcte row
+          const row = rows[0];
 
-      //Error
-      if (ex) {
-        next(new ApiError(ex.toString(), 404));
+          //Array maken en alles omzetten
+          const response = new StudentenhuisResponse(
+            row.ID,
+            row.Naam,
+            row.Adres,
+            row.Contact,
+            row.Email
+          );
 
-      } else if (rows.length == 0) {
-
-        next(new ApiError("ID " + id + " not found", 404));
-
-      } else {
-
-        //Verkrijg correcte row
-        const row = rows[0];
-
-        //Array maken en alles omzetten
-        const response = new StudentenhuisResponse(
-          row.ID,
-          row.Naam,
-          row.Adres,
-          row.Contact,
-          row.Email
-        )
-
-        //Correct, stuur studentenhuizen terug
-        res.status(200).json(response).end()
+          //Correct, stuur studentenhuizen terug
+          res
+            .status(200)
+            .json(response)
+            .end();
+        }
       }
     );
   },
 
-  /****************************************************\
-  ***** Vervang een specifiek studentenhuis bij ID *****
-  \****************************************************/
-  vervangStudentenhuis(req, res, next) {
-  },
+  vervangStudentenhuis(req, res, next) {},
 
-  /******************************************************\
-  ***** Verwijder een specifiek studentenhuis bij ID *****
-  \******************************************************/
-  verwijderStudentenhuis(req, res, next) {
-
-    //Verkrijg ID en controleer of het een nummer is
-    const id = req.params.huisId;
-    console.log(typeof (id) + ": " + id)
-    try {
-        assert(typeof (id) === 'number', 'huisId must be a number.')
-        assert(id !== NaN, 'huisId must be a number.')
-    }
-    catch (ex) {
-        next(new ApiError(ex.toString(), 412))
-        return
-    }
-
-    //Token uit header halen
-    const token = req.header('x-access-token') || ''
-
-    //Token decoderen
-    authentication.decodeToken(token, (err, payload) => {
-
-      if (err) {
-
-        //Foutief token, ga naar error endpoint
-        next(new ApiError(err.message || err, 401))
-
-      } else {
-
-        //Voer query uit die het item in studentenhuis verwijderd
-        db.query({
-          sql: 'DELETE FROM studentenhuis WHERE ID=' + id + " AND UserID = " + payload.sub.id,
-          timeout: 2000
-        }, (ex, rows, fields) => {
-
-          //Error
-          if (ex) {
-
-            next(new ApiError(ex.toString(), 404));
-
-          } else {
-
-            console.log("heuj")
-
-            //Correct, stuur studentenhuizen terug
-            res.status(200).json(response).end()
-          }
-        })
-      }
-    })
-  }
-}
+  verwijderStudentenhuis(req, res, next) {}
+};

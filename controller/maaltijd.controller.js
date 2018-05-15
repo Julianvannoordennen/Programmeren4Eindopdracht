@@ -327,38 +327,9 @@ module.exports = {
             maaltijd.ingredienten,
             maaltijd.allergie,
             maaltijd.prijs
-          )
-        )
-        .end()
-        })
-    })
 
-    /*
-    //voer de query uit
-    db.query(query, (error, rows, fields) => {
-      if (error) {
-
-        //Als er een error is stuur een api error naar next
-        next(new ApiError(error.toString(), 422))
-      } else {
-
-        //Maak een nieuwe response aan van hetgene wat er in de database is gestopt
-        res
-          .status(200)
-          .json(
-            new MaaltijdResponse(
-              null,
-              maaltijd.naam,
-              maaltijd.beschrijving,
-              maaltijd.ingredienten,
-              maaltijd.allergie,
-              maaltijd.prijs
-            )
-          )
-          .end()
+        )).end()
       }
     })
-    */
   }
-
 }

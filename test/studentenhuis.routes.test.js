@@ -312,6 +312,7 @@ describe('Studentenhuis API DELETE', () => {
         done()
     })
 
+<<<<<<< HEAD
     it('should throw an error when adres is missing', (done) => {
         //
         // Hier schrijf je jouw testcase.
@@ -324,5 +325,7 @@ describe('Studentenhuis API DELETE', () => {
 
     
         done()
+=======
+>>>>>>> tests
     })
 })

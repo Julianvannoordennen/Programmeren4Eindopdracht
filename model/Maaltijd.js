@@ -32,6 +32,7 @@ class Maaltijd {
         this.allergie = allergie.trim();
         this.prijs = prijs.trim();
     }
+
 }
 //Exporteren voor gebruik bij andere files
 module.exports = Maaltijd;

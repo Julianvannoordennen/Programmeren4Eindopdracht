@@ -46,22 +46,13 @@ module.exports = {
       //controleer of de parameter een getal is
       assert(typeof (huisId) === 'number', 'het id van het huis moet een getal zijn..')
       assert(!isNaN(huisId), 'het id van het huis moet een getal zijn.')
+
+      //Krijg de body van het request en check de JSON
+      assert(typeof req.body === "object", "request body must have an object.")
+
     } catch (ex) {
 
       //Als de parameter geen nummer is stuur dan een api error naar next
-      next(new ApiError(ex.toString(), 412))
-      return
-    }
-
-    //Krijg de body van het request en check de JSON
-    try {
-      assert(typeof req.body === "object", "request body must have an object.")
-      assert(typeof req.body.naam === "string", "naam moet text zijn.")
-      assert(typeof req.body.beschrijving === "string", "naam moet text zijn.")
-      assert(typeof req.body.ingredienten === "string","ingredienten moet text  zijn.")
-      assert(typeof req.body.allergie === "string", "allergie moet text zijn.")
-      assert(typeof req.body.prijs === "number", "prijs moet een getal zijn.")
-    } catch (ex) {
       next(new ApiError(ex.toString(), 412))
       return
     }
@@ -335,27 +326,13 @@ module.exports = {
       //controleer of de parameters een getal zijn
       assert(typeof huisId === "number", "het id van het huis moet een getal zijn.")
       assert(typeof maaltijdId === "number", "het id van de maaltijd moet een getal zijn.")
-    } catch (ex) {
-
-      //Als een parameter geen nummer is stuur dan een api error naar next
-      const error = new ApiError(ex.toString(), 412)
-      next(error)
-      return
-    }
-
-    try {
 
       //Krijg de body van het request en check de JSON
       assert(typeof req.body === "object", "request body must have an object.")
-      assert(typeof req.body.naam === "string", "naam moet text zijn.")
-      assert(typeof req.body.beschrijving === "string", "naam moet text zijn.")
-      assert(typeof req.body.ingredienten === "string", "ingredienten moet text  zijn.")
-      assert(typeof req.body.allergie === "string", "allergie moet text zijn.")
-      assert(typeof req.body.prijs === "number", "prijs moet een getal zijn.")
 
     } catch (ex) {
 
-      //Als er een error is stuur een api error naar next
+      //Als een parameter geen nummer is stuur dan een api error naar next
       const error = new ApiError(ex.toString(), 412)
       next(error)
       return
@@ -398,7 +375,7 @@ module.exports = {
         }
       }
     })
-
+    console.log(huisId + " " + maaltijdId)
     //Maak een nieuwe query aan om de bestaande maaltijd te vervangen door  de database te stoppen
     let updateQuery = {
       sql: "UPDATE maaltijd set Naam = ?, Beschrijving = ?, Ingredienten = ?, Allergie = ?, Prijs = ? WHERE StudentenhuisId = ? AND ID = ?",
@@ -408,8 +385,8 @@ module.exports = {
         maaltijd.ingredienten,
         maaltijd.allergie,
         maaltijd.prijs,
-        maaltijdId,
-        huisId
+        huisId,
+        maaltijdId
       ],
       timeout: 2000
     }
@@ -420,11 +397,14 @@ module.exports = {
         //Als er een error is stuur een api error naar next
         next(new ApiError(error.toString(), 422))
       } else {
+
+        console.log("insertedID " + rows)
         //Maak een nieuwe response aan van hetgene wat er in de database is gestopt
         res
           .status(200)
           .json(
             new MaaltijdResponse(
+              //@ TODO: fix insertedId
               rows.insertId,
               maaltijd.naam,
               maaltijd.beschrijving,
@@ -432,7 +412,7 @@ module.exports = {
               maaltijd.allergie,
               maaltijd.prijs
             )
-          ).end()
+          ).send()
       }
     })
   },

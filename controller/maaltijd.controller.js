@@ -6,8 +6,8 @@
 const ApiError = require("../model/ApiError")
 const assert = require("assert")
 const db = require("../config/db")
-const Maaltijd = require("../model/Maaltijd")
-const MaaltijdResponse = require("../model/MaaltijdResponse")
+const Maaltijd = require("../Model/Maaltijd")
+const MaaltijdResponse = require("../Model/MaaltijdResponse")
 const authentication = require("../util/auth/authentication")
 const Studentenhuis = require("../model/Studentenhuis")
 

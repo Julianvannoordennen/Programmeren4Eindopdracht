@@ -28,9 +28,9 @@ class UserRegisterJSON {
           throw(new ApiError(ex.toString(), 422))
       }
 
-      this.firstname = firstname.trim(),  // trim removes whitespace in front and at end
-      this.lastname = lastname.trim()
-      this.email = email.trim()
+      this.firstname = firstname,  // trim removes whitespace in front and at end
+      this.lastname = lastname
+      this.email = email
 
       //Password encrypten
       this.password = bcrypt.hashSync(password.trim(), 8);

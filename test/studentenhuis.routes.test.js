@@ -11,7 +11,7 @@ let studentenhuisID
 
 describe('Studentenhuis API POST', () => {
     it('should throw an error when using invalid JWT token', (done) => {
-        
+
         chai.request(server)
             .post(endpoint)
             .send({
@@ -32,7 +32,7 @@ describe('Studentenhuis API POST', () => {
     })
 
     it('should return a studentenhuis when posting a valid object', (done) => {
-        
+
         const token = require('./authentication.routes.test').token
         chai.request(server)
             .post(endpoint)
@@ -207,7 +207,7 @@ describe('Studentenhuis API PUT', () => {
                 done()
         })
     })
-    
+
     it('should return a studentenhuis with ID when posting a valid object', (done) => {
         const token = require('./authentication.routes.test').token
         chai.request(server)
@@ -321,8 +321,8 @@ describe('Studentenhuis API DELETE', () => {
         db.query("DELETE FROM studentenhuis WHERE Naam='XXXXXXXXX' AND Adres='XXXXXXXXX'",() =>{
             db.query("DELETE FROM user WHERE Email='abc@def.ghi'",() =>{} )
         } )
-        
 
+    
         done()
     })
 })

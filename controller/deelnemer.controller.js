@@ -1,6 +1,7 @@
 //CRUD Operaties deelnemer
 const ApiError = require("../model/ApiError")
 const DeelnemerResponse = require("../model/DeelnemerResponse")
+const Deelnemer = require("../model/Deelnemer")
 const authentication = require("../util/auth/authentication");
 const db = require("../config/db");
 const assert = require("assert")
@@ -16,18 +17,8 @@ module.exports = {
     const huisId = Number(req.params.huisId)
     const maaltijdId = Number(req.params.maaltijdId)
 
-    //Testen
-    try {
-      assert(typeof (huisId) === 'number', 'huisId must be a number.')
-      assert(!isNaN(huisId), 'huisId must be a number.')
-      assert(typeof (maaltijdId) === 'number', 'maaltijdId must be a number.')
-      assert(!isNaN(maaltijdId), 'maaltijdId must be a number.')
-    }
-
-    catch (ex) {
-      next(new ApiError(ex.toString(), 412))
-      return
-    }
+    //Deelnemer maken
+    const deelnemer = new Deelnemer(huisId, maaltijdId)
 
     //Token uit header halen
     const token = req.header('x-access-token') || ''
@@ -44,7 +35,7 @@ module.exports = {
 
         //Deelnemer toevoegen
         db.query({
-            sql: "INSERT INTO deelnemers VALUES(" + payload.sub.id + "," + huisId + ", " + maaltijdId + ")",
+            sql: "INSERT INTO deelnemers VALUES(" + payload.sub.id + "," + deelnemer.huisId + ", " + deelnemer.maaltijdId + ")",
             timeout: 2000
           }, (ex, rows, fields) => {
             if (ex) {
@@ -57,7 +48,7 @@ module.exports = {
 
               //Deelnemer van view verkrijgen
               db.query({
-                  sql: "SELECT * FROM view_deelnemers WHERE StudentenhuisID=" + huisId + " AND MaaltijdID=" + maaltijdId + " AND Email=(SELECT Email FROM user WHERE ID=" + payload.sub.id + ")",
+                  sql: "SELECT * FROM view_deelnemers WHERE StudentenhuisID=" + deelnemer.huisId + " AND MaaltijdID=" + deelnemer.maaltijdId + " AND Email=(SELECT Email FROM user WHERE ID=" + payload.sub.id + ")",
                   timeout: 2000
                 },(ex, rows, fields) => {
                   if (ex) {
@@ -91,22 +82,12 @@ module.exports = {
     const huisId = Number(req.params.huisId)
     const maaltijdId = Number(req.params.maaltijdId)
 
-    //Testen
-    try {
-      assert(typeof (huisId) === 'number', 'huisId must be a number.')
-      assert(!isNaN(huisId), 'huisId must be a number.')
-      assert(typeof (maaltijdId) === 'number', 'maaltijdId must be a number.')
-      assert(!isNaN(maaltijdId), 'maaltijdId must be a number.')
-    }
-
-    catch (ex) {
-      next(new ApiError(ex.toString(), 412))
-      return
-    }
+    //Deelnemer maken
+    const deelnemer = new Deelnemer(huisId, maaltijdId)
 
     //Voer query uit die alle items uit deelnemers haalt
     db.query({
-      sql: "SELECT * FROM view_deelnemers WHERE StudentenhuisID = " + huisId + " AND MaaltijdID = " + maaltijdId,
+      sql: "SELECT * FROM view_deelnemers WHERE StudentenhuisID = " + deelnemer.huisId + " AND MaaltijdID = " + deelnemer.maaltijdId,
       timeout: 2000
     }, (ex, rows, fields) => {
 
@@ -117,7 +98,7 @@ module.exports = {
 
         //Array leeg?
         if (rows.length == 0) {
-          next(new ApiError("HuisID " + huisId + " with MaaltijdId " + maaltijdId + " has no record(s)", 404));
+          next(new ApiError("HuisID " + deelnemer.huisId + " with MaaltijdId " + deelnemer.maaltijdId + " has no record(s)", 404));
 
         } else {
 
@@ -142,19 +123,9 @@ module.exports = {
     //Verkrijg IDs en controleer of het nummers zijn
     const huisId = Number(req.params.huisId)
     const maaltijdId = Number(req.params.maaltijdId)
-
-    //Testen
-    try {
-      assert(typeof (huisId) === 'number', 'huisId must be a number.')
-      assert(!isNaN(huisId), 'huisId must be a number.')
-      assert(typeof (maaltijdId) === 'number', 'maaltijdId must be a number.')
-      assert(!isNaN(maaltijdId), 'maaltijdId must be a number.')
-    }
-
-    catch (ex) {
-      next(new ApiError(ex.toString(), 412))
-      return
-    }
+    
+    //Deelnemer maken
+    const deelnemer = new Deelnemer(huisId, maaltijdId)
 
     //Token uit header halen
     const token = req.header('x-access-token') || ''
@@ -171,7 +142,7 @@ module.exports = {
 
         //Voer query uit die het item in deelnemer verwijderd
         db.query({
-          sql: "SELECT UserID FROM deelnemers WHERE StudentenhuisID=" + huisId + " AND MaaltijdID=" + maaltijdId,
+          sql: "SELECT UserID FROM deelnemers WHERE StudentenhuisID=" + deelnemer.huisId + " AND MaaltijdID=" + deelnemer.maaltijdId,
           timeout: 2000
         }, (ex, rows, fields) => {
 
@@ -189,7 +160,7 @@ module.exports = {
 
             //Voer query uit die het item in deelnemers verwijderd
             db.query({
-              sql: 'DELETE FROM deelnemers WHERE UserID=' + payload.sub.id + " AND StudentenhuisID=" + huisId + " AND MaaltijdID=" + maaltijdId,
+              sql: 'DELETE FROM deelnemers WHERE UserID=' + payload.sub.id + " AND StudentenhuisID=" + deelnemer.huisId + " AND MaaltijdID=" + deelnemer.maaltijdId,
               timeout: 2000
             }, (ex, rows, fields) => {
 
@@ -201,7 +172,7 @@ module.exports = {
               } else if (rows.affectedRows == 0) {
 
                 //Geen rows veranderd, deelnemer is niet gevonden
-                next(new ApiError("User is not authorized to remove StudentenhuisID " + huisId + " with MaaltijdID " + maaltijdId, 409));
+                next(new ApiError("User is not authorized to remove StudentenhuisID " + deelnemer.huisId + " with MaaltijdID " + deelnemer.maaltijdId, 409));
 
               } else {
 

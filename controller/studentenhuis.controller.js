@@ -196,8 +196,7 @@ module.exports = {
         assert(typeof (id) === 'number', 'huisId must be a number.')
         assert(!isNaN(id), 'huisId must be a number.')
         assert(typeof req.body === "object", "request body must have an object.")
-        assert(typeof req.body.naam === "string", "name must be a string.")
-        assert(typeof req.body.adres === "string", "adres must be a string")
+
     }
     catch (ex) {
         next(new ApiError(ex.toString(), 412))

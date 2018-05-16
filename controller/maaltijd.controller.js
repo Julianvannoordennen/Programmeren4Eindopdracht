@@ -85,7 +85,7 @@ module.exports = {
 
           //als er een error maak dan een api error aan en stuur die naar next
           next(new ApiError(error, 412));
-        } else {
+          } else {
 
           //Check of de query resultaat heeft
           if (rows.length === 0){
@@ -93,7 +93,7 @@ module.exports = {
             //Als het resultaat leeg is bestaat het studentenhuis voor dat nummer dus niet
             next(new ApiError("Er is geen studentenhuis met het opgegeven studentenhuisId", 404));
 
-          }else {
+          } else {
 
             //Als de query restultaat heeft ga door
             return

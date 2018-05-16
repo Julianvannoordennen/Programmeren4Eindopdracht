@@ -13,9 +13,21 @@ module.exports = {
   \***********************************************************/
   registreerVoorMaaltijd(req, res, next) {
 
-    //Verkrijg IDs en controleer of het nummers zijn
+    //Testen
     const huisId = Number(req.params.huisId)
     const maaltijdId = Number(req.params.maaltijdId)
+    try {
+      assert(typeof (huisId) === 'number', 'huisId must be a number.')
+      assert(typeof (maaltijdId) === 'number', 'maaltijdId must be a number.')
+      assert(!isNaN(huisId), 'huisId must be a number.')
+      assert(!isNaN(maaltijdId), 'maaltijdId must be a number.')
+    }
+
+    catch (ex) {
+        next(new ApiError(ex.toString(), 412))
+        return
+    }
+
 
     //Deelnemer maken
     const deelnemer = new Deelnemer(huisId, maaltijdId)
@@ -78,9 +90,20 @@ module.exports = {
   \***************************************************/
   krijgDeelnemers(req, res, next) {
 
-    //Verkrijg IDs en controleer of het nummers zijn
+    //Testen
     const huisId = Number(req.params.huisId)
     const maaltijdId = Number(req.params.maaltijdId)
+    try {
+      assert(typeof (huisId) === 'number', 'huisId must be a number.')
+      assert(typeof (maaltijdId) === 'number', 'maaltijdId must be a number.')
+      assert(!isNaN(huisId), 'huisId must be a number.')
+      assert(!isNaN(maaltijdId), 'maaltijdId must be a number.')
+    }
+
+    catch (ex) {
+        next(new ApiError(ex.toString(), 412))
+        return
+    }
 
     //Deelnemer maken
     const deelnemer = new Deelnemer(huisId, maaltijdId)
@@ -120,10 +143,21 @@ module.exports = {
   \*******************************************************/
   verwijderDeelnemer(req, res, next) {
 
-    //Verkrijg IDs en controleer of het nummers zijn
+    //Testen
     const huisId = Number(req.params.huisId)
     const maaltijdId = Number(req.params.maaltijdId)
-    
+    try {
+      assert(typeof (huisId) === 'number', 'huisId must be a number.')
+      assert(typeof (maaltijdId) === 'number', 'maaltijdId must be a number.')
+      assert(!isNaN(huisId), 'huisId must be a number.')
+      assert(!isNaN(maaltijdId), 'maaltijdId must be a number.')
+    }
+
+    catch (ex) {
+        next(new ApiError(ex.toString(), 412))
+        return
+    }
+
     //Deelnemer maken
     const deelnemer = new Deelnemer(huisId, maaltijdId)
 

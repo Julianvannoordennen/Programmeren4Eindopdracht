@@ -42,7 +42,7 @@ app.use("*", function(req, res, next) {
 
 //Alle errors komen hier als APIError class
 app.use((err, req, res, next) => {
-  // console.dir(err)
+
   res
     .status(err.code || 404)
     .json(err)

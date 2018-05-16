@@ -385,8 +385,7 @@ module.exports = {
                       .status(200)
                       .json(
                         new MaaltijdResponse(
-                          //@ TODO: fix insertedId
-                          rows[0].insertId,
+                          maaltijdId,
                           maaltijd.naam,
                           maaltijd.beschrijving,
                           maaltijd.ingredienten,

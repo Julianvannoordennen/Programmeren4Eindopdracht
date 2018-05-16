@@ -289,8 +289,10 @@ describe('Studentenhuis API DELETE', () => {
         })
     })
 
+    //Bij delete zou je moeten testen dat een gebruiker die het studentenhuis niet heeft aangemaakt deze ook niet kan verwijderen, en dat je het studentenhuis niet kunt verwijderen als er nog maaltijden zijn in dat studentenhuis.
+
     //Volgens swagger hoort er alleen een lege response terug te komen ...
-    it('should return a studentenhuis when posting a valid object', (done) => {
+    it('should return a message when posting a valid object', (done) => {
         const token = require('./authentication.routes.test').token
         chai.request(server)
             .delete(endpoint + "/" + studentenhuisID)
@@ -305,11 +307,19 @@ describe('Studentenhuis API DELETE', () => {
         })
     })
 
-    it('should throw an error when naam is missing', (done) => {
-        //
-        // Hier schrijf je jouw testcase.
-        //
-        done()
+    it('should not be able to remove a studentenhuis he did not create', (done) => {
+        const token = require('./authentication.routes.test').token
+        chai.request(server)
+            .delete(endpoint + "/" + 1)
+            .set("x-access-token",token)
+            .end((err, res) => {
+                res.should.have.status(200)
+                res.body.should.be.a('object')
+
+                const error = res.body
+                error.should.have.property('removed')
+                done()
+        })
     })
 
     it('should throw an error when adres is missing', (done) => {

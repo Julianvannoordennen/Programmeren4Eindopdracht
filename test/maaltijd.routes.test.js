@@ -500,7 +500,6 @@ describe('Maaltijd API DELETE', () => {
 
                 //Item verwijderen uit database want anders moet dat telkens handmatig
                 db.query("DELETE FROM maaltijd WHERE Naam = 'Een ander lekker hapje' AND Ingredienten = 'Dingen enzo en wat meer nog'",() =>{})
-                db.query("DELETE FROM user WHERE Email ='abc@def.ghi'",() =>{} )
 
                 done()
 

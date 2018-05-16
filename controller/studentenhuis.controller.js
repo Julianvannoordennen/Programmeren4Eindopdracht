@@ -12,15 +12,14 @@ module.exports = {
   ***** Voeg een nieuw studentenhuis toe *****
   \******************************************/
   maakNieuwStudentenhuis(req, res, next) {
-    //Controleren of de meegestuurde gegevens kloppen
+
     try {
-      assert(typeof req.body.naam === "string", "naam must be a string.");
-      assert(typeof req.body.adres === "string", "adres must be a string.");
-    } catch (ex) {
-      //Error
-      const error = new ApiError(ex.toString(), 412);
-      next(error);
-      return;
+      assert(typeof (req.body.naam) === 'string', 'naam must be a string.')
+      assert(typeof (req.body.adres) === 'string', 'adres must be a string.')
+    }
+    catch (ex) {
+        next(new ApiError(ex.toString(), 412))
+        return
     }
 
     //Studentenhuis maken

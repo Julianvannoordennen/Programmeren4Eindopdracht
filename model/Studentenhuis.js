@@ -5,11 +5,8 @@ const assert = require('assert')
 
 class Studentenhuis {
 
-
     //Constructor voor JSON Bericht gegevens
     constructor(naam, adres){
-        this.naam = naam;
-        this.adres = adres;
 
       try {
 
@@ -31,3 +28,6 @@ class Studentenhuis {
       this.adres = adres.trim();
     }
 }
+
+//Exporteren voor gebruik bij andere files
+module.exports = Studentenhuis;

@@ -18,6 +18,8 @@ module.exports = {
   */
   maakNieuweMaaltijd(req, res, next) {
 
+    console.log(1)
+
     //Token uit header halen
     const token = req.header('x-access-token') || ''
 
@@ -28,108 +30,113 @@ module.exports = {
       if (err) {
 
         //Foutief token, ga naar error endpoint
-        next(new ApiError(err.message || err, 401))
+        next(new ApiError(err.message || err, err.code || 401))
 
       } else {
 
+        //krijg de parameters van het request
+        let huisId = Number(req.params.huisId)
 
-      //krijg de parameters van het request
-      let huisId = Number(req.params.huisId)
+        try {
 
-      try {
+          //controleer of de parameter een getal is
+          assert(typeof (huisId) === 'number', 'het id van het huis moet een getal zijn..')
+          assert(!isNaN(huisId), 'het id van het huis moet een getal zijn.')
 
-        //controleer of de parameter een getal is
-        assert(typeof (huisId) === 'number', 'het id van het huis moet een getal zijn..')
-        assert(!isNaN(huisId), 'het id van het huis moet een getal zijn.')
+          //Krijg de body van het request en check de JSON
+          assert(typeof req.body === "object", "request body must have an object.")
 
-        //Krijg de body van het request en check de JSON
-        assert(typeof req.body === "object", "request body must have an object.")
+         } catch (ex) {
 
-      } catch (ex) {
+          //Als de parameter geen nummer is stuur dan een api error naar next
+          next(new ApiError(ex.toString(), 412))
+          return
+         }
 
-        //Als de parameter geen nummer is stuur dan een api error naar next
-        next(new ApiError(ex.toString(), 412))
-        return
-      }
+         if (err) {
 
-      //Maak een nieuwe maaltijd aan
-      let maaltijd = new Maaltijd(
-        req.body.naam,
-        req.body.beschrijving,
-        req.body.ingredienten,
-        req.body.allergie,
-        req.body.prijs
-      )
+           //Foutief token, ga naar error endpoint
+           next(new ApiError(err.message , err.code))
 
-      //Maak een nieuwe query aan om te kijken of het studentenhuis met het id bestaat
-      let selectQuery = {
-        sql: "SELECT * FROM maaltijd WHERE StudentenhuisId = ?",
-        values: [huisId],
-        timeout: 2000
-      }
+         }
 
-      //Voer de query uit
-      db.query(selectQuery,(error, rows, fields) => {
-          if (error) {
+         //Maak een nieuwe maaltijd aan
+         let maaltijd = new Maaltijd(
+          req.body.naam,
+          req.body.beschrijving,
+          req.body.ingredienten,
+          req.body.allergie,
+          req.body.prijs
+        )
 
-            //als er een error maak dan een api error aan en stuur die naar next
-            next(new ApiError(error, 412));
-          } else {
 
-            //Check of de query resultaat heeft
-            if (rows.length === 0){
+        //Maak een nieuwe query aan om te kijken of het studentenhuis met het id bestaat
+        let selectQuery = {
+          sql: "SELECT * FROM maaltijd WHERE StudentenhuisId = ?",
+          values: [huisId],
+          timeout: 2000
+        }
 
-              //Als het resultaat leeg is bestaat het studentenhuis voor dat nummer dus niet
-              next(new ApiError("Er is geen studentenhuis met het opgegeven studentenhuisId", 404));
+        //Voer de query uit
+        db.query(selectQuery,(error, rows, fields) => {
+            if (error) {
 
-            }else {
+              //als er een error maak dan een api error aan en stuur die naar next
+              next(new ApiError(error, 412));
+            } else {
 
-              //Als de query restultaat heeft ga door
-              return
+              //Check of de query resultaat heeft
+              if (rows.length === 0){
+
+                //Als het resultaat leeg is bestaat het studentenhuis voor dat nummer dus niet
+                next(new ApiError("Er is geen studentenhuis met het opgegeven studentenhuisId", 404));
+
+              }else {
+
+                //Als de query restultaat heeft ga door
+                //Maak een nieuwe query aan om de maaltijd in de database te stoppen
+                let insertQuery = {
+                  sql: "INSERT INTO maaltijd VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                  values: [
+                    null,
+                    maaltijd.naam,
+                    maaltijd.beschrijving,
+                    maaltijd.ingredienten,
+                    maaltijd.allergie,
+                    maaltijd.prijs,
+                    payload.sub.id,
+                    huisId
+                    ],
+                  timeout: 2000
+                }
+                //voer de query uit
+                db.query(insertQuery, (error, rows, fields) => {
+                  if (error) {
+
+                    //als er een error maak dan een api error aan en stuur die naar next
+                    next(new ApiError(error.toString(), 422))
+                  } else {
+                    //Maak een nieuwe response aan van hetgene wat er in de database is gestopt
+                    res
+                      .status(200)
+                      .json(
+                        new MaaltijdResponse(
+                          rows.insertId,
+                          maaltijd.naam,
+                          maaltijd.beschrijving,
+                          maaltijd.ingredienten,
+                          maaltijd.allergie,
+                          maaltijd.prijs
+                        )
+                      ).end()
+                  }
+                })
+              }
             }
           }
-        }
-      )
-
-      //Maak een nieuwe query aan om de maaltijd in de database te stoppen
-      let insertQuery = {
-        sql: "INSERT INTO maaltijd VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        values: [
-          null,
-          maaltijd.naam,
-          maaltijd.beschrijving,
-          maaltijd.ingredienten,
-          maaltijd.allergie,
-          maaltijd.prijs,
-          payload.sub.id,
-          huisId
-          ],
-        timeout: 2000
+        )
       }
-      //voer de query uit
-      db.query(insertQuery, (error, rows, fields) => {
-        if (error) {
-
-          //als er een error maak dan een api error aan en stuur die naar next
-          next(new ApiError(error.toString(), 422))
-        } else {
-          //Maak een nieuwe response aan van hetgene wat er in de database is gestopt
-          res
-            .status(200)
-            .json(
-              new MaaltijdResponse(
-                rows.insertId,
-                maaltijd.naam,
-                maaltijd.beschrijving,
-                maaltijd.ingredienten,
-                maaltijd.allergie,
-                maaltijd.prijs
-              )
-            ).end()
-        }
-      })
-    }
-  })
+    })
   },
 
   /*
@@ -299,7 +306,7 @@ module.exports = {
       if (err) {
 
         //Foutief token, ga naar error endpoint
-        next(new ApiError(err.message || err, 401))
+        next(new ApiError(err.message || err, err.code || 401))
       } else {
 
         //krijg de parameters van het request
@@ -325,15 +332,20 @@ module.exports = {
           return
         }
 
-        //Maak een nieuwe maaltijd aan
+        ///Maak een nieuwe maaltijd aan
         let maaltijd = new Maaltijd(
-          req.body.naam,
-          req.body.beschrijving,
-          req.body.ingredienten,
-          req.body.allergie,
-          req.body.prijs
-        )
+         req.body.naam,
+         req.body.beschrijving,
+         req.body.ingredienten,
+         req.body.allergie,
+         req.body.prijs
+       )
+       if (err) {
 
+         //Foutief token, ga naar error endpoint
+         next(new ApiError(err.message , err.code))
+
+       }
         //maak een query aan om te kijken of een maaltijd met het maaltijdId bestaat bij het studentenhuis met het studentenhuisId
         let selectQuery = {
           sql: "SELECT * FROM maaltijd WHERE StudentenHuisId = ? AND ID = ?",
@@ -411,8 +423,6 @@ module.exports = {
         //Token uit header halen
         const token = req.header('x-access-token') || ''
 
-        //Variable voor de Payload aanmaken
-
         //Token decoderen
         authentication.decodeToken(token, (err, payload) => {
           if (err) {
@@ -483,7 +493,11 @@ module.exports = {
                       next(new ApiError(error, 422))
                     } else {
                       //Maak een nieuwe response aan van hetgene wat er in de database is gestopt
-                      res.status(200).json({"Status": "succesfully deleted"}).end()
+
+                      const response = {
+                        'removed': 'succesfull'
+                      }
+                      res.status(200).json(response).end()
                     }
                   })
                 }

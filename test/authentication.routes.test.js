@@ -1,5 +1,5 @@
 /**
- * Testcases aimed at testing the authentication process.
+ * Testcases aimed at testing the authentication process. 
  */
 const chai = require('chai')
 const chaiHttp = require('chai-http')
@@ -22,7 +22,7 @@ describe('Registration', () => {
             .send({
                 'firstname': 'TestFirst',
                 'lastname': 'TestLast',
-                'email': 'abc@gmail.com',
+                'email': 'abc@def.ghi',
                 'password': 'Test'
             })
             .end((err, res) => {
@@ -32,7 +32,7 @@ describe('Registration', () => {
                 const response = res.body
                 response.should.have.property('token').which.is.a('string')
                 response.should.have.property('email').which.is.a('string')
-
+                
                 //Token opslaan
                 const validToken = res.body.token
                 module.exports = {token: validToken}
@@ -148,7 +148,7 @@ describe('Login', () => {
                 const response = res.body
                 response.should.have.property('token').which.is.a('string')
                 response.should.have.property('email').which.is.a('string')
-
+                
                 done()
         })
     })
@@ -167,7 +167,7 @@ describe('Login', () => {
                 error.should.have.property('message')
                 error.should.have.property('code').equals(412)
                 error.should.have.property('datetime')
-
+                
                 done()
         })
     })
@@ -187,7 +187,7 @@ describe('Login', () => {
                 error.should.have.property('message')
                 error.should.have.property('code').equals(401)
                 error.should.have.property('datetime')
-
+                
                 done()
         })
     })
@@ -206,7 +206,7 @@ describe('Login', () => {
                 error.should.have.property('message')
                 error.should.have.property('code').equals(412)
                 error.should.have.property('datetime')
-
+                
                 done()
         })
     })

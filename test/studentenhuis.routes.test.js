@@ -2,6 +2,7 @@ const chai = require('chai')
 const chaiHttp = require('chai-http')
 const server = require('../server')
 const db = require("../config/db");
+const authentication = require("../util/auth/authentication");
 
 chai.should()
 chai.use(chaiHttp)
@@ -289,27 +290,56 @@ describe('Studentenhuis API DELETE', () => {
         })
     })
 
-    //Volgens swagger hoort er alleen een lege response terug te komen ...
-    it('should return a studentenhuis when posting a valid object', (done) => {
+    it('should not be able to remove a studentenhuis he did not create', (done) => {
         const token = require('./authentication.routes.test').token
         chai.request(server)
-            .delete(endpoint + "/" + studentenhuisID)
+            .delete(endpoint + "/" + 1)
             .set("x-access-token",token)
             .end((err, res) => {
-                res.should.have.status(200)
+                res.should.have.status(409)
                 res.body.should.be.a('object')
 
                 const error = res.body
-                error.should.have.property('removed')
+                error.should.have.property('message')
+                error.should.have.property('code').equals(409)
+                error.should.have.property('datetime')
                 done()
         })
     })
 
-    it('should throw an error when naam is missing', (done) => {
-        //
-        // Hier schrijf je jouw testcase.
-        //
-        done()
+    it('should not be able to remove a studentenhuis when it still has meals', (done) => {
+        const token = require('./authentication.routes.test').token
+        console.log(token)
+
+        //Decoden
+        authentication.decodeToken(token, (err, payload) => {
+
+            //Maak een nieuwe query aan om de maaltijd in de database te stoppen voor de volgende test
+            let query = {
+                sql: "INSERT INTO maaltijd VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                values: [null, 'xxTestMaaltijd', 'xxTestBeschrijving', 'xxTestIngredienten', 'xxTestAllergieen', 1, payload.sub.id, studentenhuisID],
+                timeout: 2000
+            }
+            
+            db.query(query, (error, rows , fields) => {
+                chai.request(server)
+                    .delete(endpoint + "/" + rows.insertId)
+                    .set("x-access-token",token)
+                    .end((err, res) => {
+                        res.should.have.status(404)
+                        res.body.should.be.a('object')
+
+                        const error = res.body
+                        error.should.have.property('message')
+                        error.should.have.property('code').equals(404)
+                        error.should.have.property('datetime')
+
+                        //Weer verwijderen
+                        db.query("DELETE FROM maaltijd WHERE Naam='xxTestMaaltijd' AND Beschrijving='xxTestBeschrijving'",() =>{})
+                        done()
+                })
+            })
+        })
     })
 
 <<<<<<< HEAD
@@ -326,6 +356,26 @@ describe('Studentenhuis API DELETE', () => {
     
         done()
 =======
+    it('should return a message when posting a valid object', (done) => {
+        const token = require('./authentication.routes.test').token
+        chai.request(server)
+            .delete(endpoint + "/" + studentenhuisID)
+            .set("x-access-token",token)
+            .end((err, res) => {
+                res.should.have.status(200)
+                res.body.should.be.a('object')
+
+                const error = res.body
+                error.should.have.property('removed')
+
+                //Item verwijderen uit database want anders moet dat telkens handmatig
+                db.query("DELETE FROM studentenhuis WHERE Naam='XXXXXXXXX' AND Adres='XXXXXXXXX'",() =>{
+                    db.query("DELETE FROM user WHERE Email='abc@def.ghi'",() =>{} )
+                })
+
+                done()
+                
+        })
 >>>>>>> tests
     })
 })
